@@ -1,0 +1,21 @@
+# Essential Web Framework Dependencies
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Data Processing Essentials
+pandas==2.0.3
+numpy==1.24.3
+
+# PySpark for Big Data Processing
+pyspark>=3.4.0
+
+# Machine Learning Libraries
+scikit-learn>=1.0.0
+
+# Data Visualization
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Additional Utilities
+python-dateutil>=2.8.0
+joblib>=1.0.0

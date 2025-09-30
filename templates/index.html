@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudShield - AI-Powered Fraud Detection</title>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="Advanced AI-powered fraud detection system for financial transactions using PySpark and Machine Learning">
+    <meta name="keywords" content="fraud detection, machine learning, pyspark, financial security, AI">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav container">
+            <a href="#" class="logo">
+                <div class="logo-icon">FS</div>
+                FraudShield
+            </a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#upload">Upload</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="container">
+                <h1>🛡️ FraudShield</h1>
+                <p>Advanced AI-powered fraud detection system that analyzes financial transactions in real-time using cutting-edge machine learning algorithms.</p>
+                <a href="#upload" class="btn btn-primary btn-lg">Start Analysis</a>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section id="upload" class="upload-section">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📊 Upload Transaction Data</h2>
+                        <p>Upload your CSV file containing transaction data for fraud analysis</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div id="uploadArea" class="upload-area">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">
+                                <strong>Click to upload</strong> or drag and drop your CSV file here
+                            </div>
+                            <div class="upload-text">
+                                Supported format: CSV (Max size: 50MB)
+                            </div>
+                            <input type="file" id="fileInput" class="file-input" accept=".csv">
+                        </div>
+                        
+                        <!-- File Name Display -->
+                        <div id="fileName" style="display: none; margin-top: 1rem; font-weight: 600; color: var(--secondary-color);"></div>
+                        
+                        <!-- Process Button -->
+                        <div style="text-align: center; margin-top: 2rem;">
+                            <button id="processBtn" class="btn btn-outline" disabled>
+                                🚀 Analyze Transactions
+                            </button>
+                            <button id="testConnectionBtn" class="btn btn-secondary" onclick="testConnection()" style="margin-left: 1rem;">
+                                🔌 Test Connection
+                            </button>
+                            <button id="testResponseBtn" class="btn btn-secondary" onclick="testResponse()" style="margin-left: 1rem;">
+                                🧪 Test Display
+                            </button>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div id="progressContainer" class="progress-container">
+                            <div class="progress-bar">
+                                <div id="progressFill" class="progress-fill"></div>
+                            </div>
+                            <p style="text-align: center; margin-top: 1rem; color: var(--text-light);">
+                                Processing your data... This may take a few moments.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results" class="results-section">
+            <div class="container">
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card total-stat">
+                        <div class="stat-number" id="totalTransactions">0</div>
+                        <div class="stat-label">Total Transactions</div>
+                    </div>
+                    <div class="stat-card fraud-stat">
+                        <div class="stat-number" id="fraudTransactions">0</div>
+                        <div class="stat-label">Fraudulent</div>
+                    </div>
+                    <div class="stat-card normal-stat">
+                        <div class="stat-number" id="normalTransactions">0</div>
+                        <div class="stat-label">Normal</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="fraudPercentage">0%</div>
+                        <div class="stat-label">Fraud Rate</div>
+                    </div>
+                </div>
+
+                <!-- Charts Container -->
+                <div class="charts-container">
+                    <!-- Fraud by Amount Range -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Fraud by Amount Range</h3>
+                        <canvas id="fraudByAmountChart"></canvas>
+                    </div>
+                    
+                    <!-- Fraud by Merchant -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Top Merchants with Fraud</h3>
+                        <canvas id="fraudByMerchantChart"></canvas>
+                    </div>
+                    
+                    <!-- Fraud Over Time -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Fraud Trends Over Time</h3>
+                        <canvas id="fraudOverTimeChart"></canvas>
+                    </div>
+                    
+                    <!-- Fraud by Payment Method -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Fraud by Payment Method</h3>
+                        <canvas id="fraudByPaymentChart"></canvas>
+                    </div>
+                    
+                    <!-- Data Quality Assessment -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Data Quality Assessment</h3>
+                        <canvas id="dataQualityChart"></canvas>
+                    </div>
+                    
+                    <!-- Anomaly Detection -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Anomaly Detection</h3>
+                        <canvas id="anomaliesChart"></canvas>
+                    </div>
+                    
+                    <!-- Risk Score Distribution -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Risk Score Distribution</h3>
+                        <canvas id="riskDistributionChart"></canvas>
+                    </div>
+                    
+                    <!-- Model Performance Comparison -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">ML Model Performance</h3>
+                        <canvas id="modelPerformanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Download Section -->
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="/download" id="downloadBtn" class="btn btn-secondary">
+                        📥 Download Results
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="upload-section">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>🤖 About FraudShield</h2>
+                        <p>Powered by Apache Spark and Machine Learning</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" style="color: var(--primary-color);">⚡</div>
+                                <div class="stat-label">Real-time Processing</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" style="color: var(--secondary-color);">🧠</div>
+                                <div class="stat-label">AI-Powered Detection</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" style="color: var(--warning-color);">📊</div>
+                                <div class="stat-label">Advanced Analytics</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" style="color: var(--danger-color);">🔒</div>
+                                <div class="stat-label">Secure & Compliant</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 2rem; text-align: center;">
+                            <h3 style="margin-bottom: 1rem;">Key Features</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; text-align: left;">
+                                <div>
+                                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">🔍 Advanced Detection</h4>
+                                    <p style="color: var(--text-light);">Multiple ML algorithms including Random Forest, Logistic Regression, and Isolation Forest for comprehensive fraud detection.</p>
+                                </div>
+                                <div>
+                                    <h4 style="color: var(--secondary-color); margin-bottom: 0.5rem;">⚡ Scalable Processing</h4>
+                                    <p style="color: var(--text-light);">Built on Apache Spark for handling millions of transactions with lightning-fast processing speeds.</p>
+                                </div>
+                                <div>
+                                    <h4 style="color: var(--warning-color); margin-bottom: 0.5rem;">📈 Rich Analytics</h4>
+                                    <p style="color: var(--text-light);">Comprehensive dashboards with interactive charts and detailed fraud pattern analysis.</p>
+                                </div>
+                                <div>
+                                    <h4 style="color: var(--danger-color); margin-bottom: 0.5rem;">🛡️ Enterprise Security</h4>
+                                    <p style="color: var(--text-light);">Bank-grade security with compliance features for financial industry standards.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 FraudShield. Built with ❤️ using PySpark & Machine Learning.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
