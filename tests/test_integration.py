@@ -33,7 +33,7 @@ def test_pipeline_integration():
     print("\n2. Testing file upload and processing...")
     
     # Check if sample file exists
-    sample_file = "sample_transactions.csv"
+    sample_file = "../data/sample_transactions.csv"
     if not os.path.exists(sample_file):
         print(f"❌ Sample file {sample_file} not found")
         return False

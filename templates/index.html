@@ -17,6 +17,65 @@
     <meta name="keywords" content="fraud detection, machine learning, pyspark, financial security, AI">
 </head>
 <body>
+    <!-- Page Loading Screen -->
+    <div id="pageLoader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-logo">
+                <div class="shield-icon">🛡️</div>
+                <h2>FraudShield</h2>
+                <p class="loader-subtitle">Initializing AI Security System</p>
+            </div>
+            
+            <div class="loader-progress">
+                <div class="progress-ring">
+                    <svg class="progress-ring-svg" width="120" height="120">
+                        <circle class="progress-ring-bg" cx="60" cy="60" r="45" stroke="#e5e7eb" stroke-width="4" fill="transparent"/>
+                        <circle class="progress-ring-fill" cx="60" cy="60" r="45" stroke="#3b82f6" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+                    </svg>
+                    <div class="progress-text">
+                        <span id="loadingPercent">0</span>%
+                    </div>
+                </div>
+                
+                <div class="loading-steps">
+                    <div class="step active" id="step1">
+                        <div class="step-icon">⚡</div>
+                        <span>Initializing System</span>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-icon">🔒</div>
+                        <span>Loading Security Modules</span>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-icon">🧠</div>
+                        <span>Preparing AI Engine</span>
+                    </div>
+                    <div class="step" id="step4">
+                        <div class="step-icon">✅</div>
+                        <span>System Ready</span>
+                    </div>
+                </div>
+                
+                <div class="loader-tech-info">
+                    <div class="tech-line">
+                        <span id="techStatus">Initializing core modules...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="loader-background">
+            <div class="grid-pattern"></div>
+            <div class="floating-particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <nav class="nav container">
@@ -32,6 +91,14 @@
             </ul>
         </nav>
     </header>
+
+    <!-- Connection Status Banner -->
+    <div id="connectionStatus" class="connection-status">
+        <div class="status-content">
+            <span id="statusIcon">🔄</span>
+            <span id="statusText">Checking connection...</span>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="main">
@@ -73,110 +140,372 @@
                             <button id="processBtn" class="btn btn-outline" disabled>
                                 🚀 Analyze Transactions
                             </button>
-                            <button id="testConnectionBtn" class="btn btn-secondary" onclick="testConnection()" style="margin-left: 1rem;">
-                                🔌 Test Connection
-                            </button>
-                            <button id="testResponseBtn" class="btn btn-secondary" onclick="testResponse()" style="margin-left: 1rem;">
-                                🧪 Test Display
-                            </button>
-                        </div>
-                        
-                        <!-- Progress Bar -->
-                        <div id="progressContainer" class="progress-container">
-                            <div class="progress-bar">
-                                <div id="progressFill" class="progress-fill"></div>
-                            </div>
-                            <p style="text-align: center; margin-top: 1rem; color: var(--text-light);">
-                                Processing your data... This may take a few moments.
-                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- Progress Bar -->
+        <div id="progressContainer" class="container progress-container">
+            <div class="card processing-card">
+                <div class="card-body">
+                    <div class="processing-header">
+                        <div class="processing-icon">
+                            <div class="radar-scanner"></div>
+                            <div class="scan-lines"></div>
+                        </div>
+                        <h3 id="processingTitle">🔍 Analyzing Transaction Data</h3>
+                        <p class="processing-subtitle">AI-powered fraud detection in progress</p>
+                    </div>
+                    
+                    <div class="processing-metrics">
+                        <div class="metric">
+                            <div class="metric-value" id="processedCount">0</div>
+                            <div class="metric-label">Transactions Processed</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value" id="detectionRate">0%</div>
+                            <div class="metric-label">Detection Rate</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value" id="timeElapsed">00:00</div>
+                            <div class="metric-label">Time Elapsed</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-circle">
+                            <svg class="progress-circle-svg" width="140" height="140">
+                                <circle class="progress-circle-bg" cx="70" cy="70" r="60" stroke="#e5e7eb" stroke-width="6" fill="transparent"/>
+                                <circle class="progress-circle-fill" id="progressCircle" cx="70" cy="70" r="60" stroke="#3b82f6" stroke-width="6" fill="transparent" stroke-linecap="round"/>
+                            </svg>
+                            <div class="progress-center">
+                                <div class="progress-percent" id="progressPercent">0%</div>
+                                <div class="progress-status" id="progressStatus">Initializing...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-stages">
+                            <div class="stage active" id="stage1">
+                                <div class="stage-dot"></div>
+                                <span>Data Ingestion</span>
+                            </div>
+                            <div class="stage" id="stage2">
+                                <div class="stage-dot"></div>
+                                <span>Preprocessing</span>
+                            </div>
+                            <div class="stage" id="stage3">
+                                <div class="stage-dot"></div>
+                                <span>ML Analysis</span>
+                            </div>
+                            <div class="stage" id="stage4">
+                                <div class="stage-dot"></div>
+                                <span>Results</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="processing-details">
+                        <div class="detail-line">
+                            <span class="detail-label">Current Task:</span>
+                            <span class="detail-value" id="currentTask">Initializing fraud detection engine...</span>
+                        </div>
+                        <div class="processing-log" id="processingLog">
+                            <div class="log-item">• System initialized</div>
+                        </div>
+                    </div>
+                    
+                    <div class="processing-actions">
+                        <button id="cancelProcessing" class="btn btn-outline btn-cancel" onclick="cancelProcessing()">
+                            ⏹️ Cancel Processing
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Results Section -->
         <section id="results" class="results-section">
             <div class="container">
-                <!-- Statistics Cards -->
+                <!-- Statistics -->
                 <div class="stats-grid">
-                    <div class="stat-card total-stat">
+                    <div class="stat-card">
                         <div class="stat-number" id="totalTransactions">0</div>
                         <div class="stat-label">Total Transactions</div>
                     </div>
                     <div class="stat-card fraud-stat">
-                        <div class="stat-number" id="fraudTransactions">0</div>
-                        <div class="stat-label">Fraudulent</div>
-                    </div>
-                    <div class="stat-card normal-stat">
-                        <div class="stat-number" id="normalTransactions">0</div>
-                        <div class="stat-label">Normal</div>
+                        <div class="stat-number" id="fraudDetected">0</div>
+                        <div class="stat-label">Fraud Detected</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="fraudPercentage">0%</div>
-                        <div class="stat-label">Fraud Rate</div>
+                        <div class="stat-number" id="normalTransactions">0</div>
+                        <div class="stat-label">Normal Transactions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="accuracyScore">0%</div>
+                        <div class="stat-label">Model Accuracy</div>
                     </div>
                 </div>
 
-                <!-- Charts Container -->
-                <div class="charts-container">
-                    <!-- Fraud by Amount Range -->
-                    <div class="chart-card">
-                        <h3 class="chart-title">Fraud by Amount Range</h3>
-                        <canvas id="fraudByAmountChart"></canvas>
-                    </div>
-                    
-                    <!-- Fraud by Merchant -->
-                    <div class="chart-card">
-                        <h3 class="chart-title">Top Merchants with Fraud</h3>
-                        <canvas id="fraudByMerchantChart"></canvas>
-                    </div>
-                    
+                <!-- Charts Grid -->
+                <div class="charts-grid">
                     <!-- Fraud Over Time -->
                     <div class="chart-card">
-                        <h3 class="chart-title">Fraud Trends Over Time</h3>
-                        <canvas id="fraudOverTimeChart"></canvas>
+                        <div class="chart-header">
+                            <h3>📈 Fraud Detection Over Time</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="fraudTimeChart"></canvas>
+                        </div>
                     </div>
-                    
+
+                    <!-- Fraud by Amount -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>💰 Fraud by Transaction Amount</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="fraudAmountChart"></canvas>
+                        </div>
+                    </div>
+
                     <!-- Fraud by Payment Method -->
                     <div class="chart-card">
-                        <h3 class="chart-title">Fraud by Payment Method</h3>
-                        <canvas id="fraudByPaymentChart"></canvas>
+                        <div class="chart-header">
+                            <h3>💳 Fraud by Payment Method</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="fraudPaymentChart"></canvas>
+                        </div>
                     </div>
-                    
-                    <!-- Data Quality Assessment -->
+
+                    <!-- Model Performance -->
                     <div class="chart-card">
-                        <h3 class="chart-title">Data Quality Assessment</h3>
-                        <canvas id="dataQualityChart"></canvas>
+                        <div class="chart-header">
+                            <h3>🎯 Model Performance Metrics</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="modelPerformanceChart"></canvas>
+                        </div>
                     </div>
-                    
+
+                    <!-- Risk Distribution -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>⚠️ Risk Score Distribution</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="riskDistributionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Data Quality -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>📊 Data Quality Assessment</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="dataQualityChart"></canvas>
+                        </div>
+                    </div>
+
                     <!-- Anomaly Detection -->
                     <div class="chart-card">
-                        <h3 class="chart-title">Anomaly Detection</h3>
-                        <canvas id="anomaliesChart"></canvas>
+                        <div class="chart-header">
+                            <h3>🔍 Anomaly Detection Patterns</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="anomalyChart"></canvas>
+                        </div>
                     </div>
-                    
-                    <!-- Risk Score Distribution -->
+
+                    <!-- Fraud by Merchant -->
                     <div class="chart-card">
-                        <h3 class="chart-title">Risk Score Distribution</h3>
-                        <canvas id="riskDistributionChart"></canvas>
-                    </div>
-                    
-                    <!-- Model Performance Comparison -->
-                    <div class="chart-card">
-                        <h3 class="chart-title">ML Model Performance</h3>
-                        <canvas id="modelPerformanceChart"></canvas>
+                        <div class="chart-header">
+                            <h3>🏪 Fraud by Merchant Category</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="fraudMerchantChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Download Section -->
-                <div style="text-align: center; margin-top: 2rem;">
-                    <a href="/download" id="downloadBtn" class="btn btn-secondary">
+                <!-- Download Button -->
+                <div style="text-align: center; margin: 2rem 0;">
+                    <button id="downloadBtn" class="btn btn-secondary">
                         📥 Download Results
-                    </a>
+                    </button>
                 </div>
             </div>
         </section>
+
+        <!-- Download Format Modal -->
+        <div id="downloadModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">📥 Download Results</h3>
+                    <span class="close" onclick="closeDownloadModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <!-- Step 1: Format Selection -->
+                    <div id="formatSelectionStep">
+                        <p>Select the format for downloading your fraud detection results:</p>
+                        <div class="format-options">
+                            <button class="format-btn" onclick="selectFormat('csv')">
+                                📄 CSV File
+                                <small>Comma-separated values, universal compatibility</small>
+                            </button>
+                            <button class="format-btn" onclick="selectFormat('excel')">
+                                📊 Excel File
+                                <small>Microsoft Excel format with formatting</small>
+                            </button>
+                            <button class="format-btn" onclick="selectFormat('pdf')">
+                                📋 PDF Report
+                                <small>Professional report with charts and analysis</small>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Preview Content -->
+                    <div id="previewStep" style="display: none;">
+                        <div class="preview-header">
+                            <h4 id="previewTitle">Preview Content</h4>
+                            <button class="btn btn-outline" onclick="backToFormatSelection()">← Back</button>
+                        </div>
+                        <div id="previewContent" class="preview-content">
+                            <!-- Content preview will be loaded here -->
+                        </div>
+                        <div class="preview-actions">
+                            <button id="confirmDownloadBtn" class="btn btn-primary" onclick="confirmDownload()">
+                                📥 Download File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Input Modal for Location and Merchant Selection -->
+        <div id="userInputModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="inputModalTitle">🎯 Fraud Detection Configuration</h3>
+                    <span class="close" onclick="closeUserInputModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="input-section">
+                        <h4>📍 Select Suspicious Locations</h4>
+                        <p>From your data, please select locations that you consider high-risk or suspicious:</p>
+                        <div id="locationCheckboxes" class="checkbox-grid">
+                            <!-- Location checkboxes will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="input-section">
+                        <h4>🏪 Select Suspicious Merchants</h4>
+                        <p>From your data, please select merchants that you consider high-risk or suspicious:</p>
+                        <div id="merchantCheckboxes" class="checkbox-grid">
+                            <!-- Merchant checkboxes will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="input-actions">
+                        <button class="btn btn-outline" onclick="skipUserInput()">⏭️ Skip (Use Default)</button>
+                        <button class="btn btn-primary" onclick="applyUserInput()">✅ Apply & Analyze</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Interface -->
+        <div id="processingInterface" class="processing-overlay" style="display: none;">
+            <div class="processing-card">
+                <div class="processing-header">
+                    <div class="processing-icon">
+                        <div class="radar-scanner">
+                            <div class="scan-lines"></div>
+                        </div>
+                    </div>
+                    <h2>🔍 Analyzing Transactions</h2>
+                    <p class="processing-subtitle">AI-powered fraud detection in progress</p>
+                </div>
+                
+                <div class="processing-metrics">
+                    <div class="metric">
+                        <div class="metric-value">0</div>
+                        <div class="metric-label">Records</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">0</div>
+                        <div class="metric-label">Patterns</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">0</div>
+                        <div class="metric-label">Flags</div>
+                    </div>
+                </div>
+                
+                <div class="progress-section">
+                    <div class="progress-circle">
+                        <svg class="progress-circle-svg" width="140" height="140">
+                            <circle class="progress-circle-bg" cx="70" cy="70" r="60" stroke="#e5e7eb" stroke-width="4" fill="transparent"/>
+                            <circle class="progress-circle-fill" cx="70" cy="70" r="60" stroke="#3b82f6" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+                        </svg>
+                        <div class="progress-center">
+                            <div class="progress-percent">0%</div>
+                            <div class="progress-status">Initializing</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-stages">
+                        <div class="stage" id="stage1">
+                            <div class="stage-dot"></div>
+                            <span>Initializing fraud detection...</span>
+                        </div>
+                        <div class="stage" id="stage2">
+                            <div class="stage-dot"></div>
+                            <span>Analyzing transaction patterns...</span>
+                        </div>
+                        <div class="stage" id="stage3">
+                            <div class="stage-dot"></div>
+                            <span>Applying ML algorithms...</span>
+                        </div>
+                        <div class="stage" id="stage4">
+                            <div class="stage-dot"></div>
+                            <span>Generating fraud reports...</span>
+                        </div>
+                        <div class="stage" id="stage5">
+                            <div class="stage-dot"></div>
+                            <span>Finalizing results...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="processing-details">
+                    <div class="detail-line">
+                        <span class="detail-label">Processing Time:</span>
+                        <span class="detail-value" id="processingTime">00:00</span>
+                    </div>
+                    <div class="detail-line">
+                        <span class="detail-label">Current Stage:</span>
+                        <span class="detail-value" id="currentStage">Initialization</span>
+                    </div>
+                    <div class="detail-line">
+                        <span class="detail-label">Algorithm:</span>
+                        <span class="detail-value">Multi-Layer Fraud Detection</span>
+                    </div>
+                </div>
+                
+                <div class="processing-log">
+                    <div class="log-item">[System] Fraud detection engine initialized</div>
+                </div>
+                
+                <div class="processing-actions">
+                    <button class="btn btn-cancel">❌ Cancel Processing</button>
+                </div>
+            </div>
+        </div>
 
         <!-- About Section -->
         <section id="about" class="upload-section">
@@ -187,44 +516,26 @@
                         <p>Powered by Apache Spark and Machine Learning</p>
                     </div>
                     <div class="card-body">
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-number" style="color: var(--primary-color);">⚡</div>
-                                <div class="stat-label">Real-time Processing</div>
+                        <div class="feature-grid">
+                            <div class="feature-item">
+                                <div class="feature-icon">⚡</div>
+                                <h3>Real-time Processing</h3>
+                                <p>Analyze thousands of transactions per second using distributed computing with Apache Spark.</p>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-number" style="color: var(--secondary-color);">🧠</div>
-                                <div class="stat-label">AI-Powered Detection</div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🧠</div>
+                                <h3>Advanced ML Models</h3>
+                                <p>Multiple machine learning algorithms including Random Forest, Gradient Boosting, and Neural Networks.</p>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-number" style="color: var(--warning-color);">📊</div>
-                                <div class="stat-label">Advanced Analytics</div>
+                            <div class="feature-item">
+                                <div class="feature-icon">📊</div>
+                                <h3>Interactive Analytics</h3>
+                                <p>Comprehensive visualizations and real-time dashboards for fraud pattern analysis.</p>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-number" style="color: var(--danger-color);">🔒</div>
-                                <div class="stat-label">Secure & Compliant</div>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top: 2rem; text-align: center;">
-                            <h3 style="margin-bottom: 1rem;">Key Features</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; text-align: left;">
-                                <div>
-                                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">🔍 Advanced Detection</h4>
-                                    <p style="color: var(--text-light);">Multiple ML algorithms including Random Forest, Logistic Regression, and Isolation Forest for comprehensive fraud detection.</p>
-                                </div>
-                                <div>
-                                    <h4 style="color: var(--secondary-color); margin-bottom: 0.5rem;">⚡ Scalable Processing</h4>
-                                    <p style="color: var(--text-light);">Built on Apache Spark for handling millions of transactions with lightning-fast processing speeds.</p>
-                                </div>
-                                <div>
-                                    <h4 style="color: var(--warning-color); margin-bottom: 0.5rem;">📈 Rich Analytics</h4>
-                                    <p style="color: var(--text-light);">Comprehensive dashboards with interactive charts and detailed fraud pattern analysis.</p>
-                                </div>
-                                <div>
-                                    <h4 style="color: var(--danger-color); margin-bottom: 0.5rem;">🛡️ Enterprise Security</h4>
-                                    <p style="color: var(--text-light);">Bank-grade security with compliance features for financial industry standards.</p>
-                                </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🔒</div>
+                                <h3>Enterprise Security</h3>
+                                <p>Bank-grade security with encrypted processing and secure data handling protocols.</p>
                             </div>
                         </div>
                     </div>
@@ -236,11 +547,11 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 FraudShield. Built with ❤️ using PySpark & Machine Learning.</p>
+            <p>&copy; 2024 FraudShield. Advanced AI-powered fraud detection system.</p>
         </div>
     </footer>
 
     <!-- JavaScript -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=3"></script>
 </body>
 </html>
