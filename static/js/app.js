@@ -16,10 +16,19 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
     initializeAnimations();
     
+    // Initialize privacy banner (dismissable)
+    initializePrivacyBanner();
+
     // Start automatic connection checking
     checkConnectionOnLoad();
     startConnectionMonitoring();
 });
+
+function initializePrivacyBanner() {
+    // Privacy notice is now integrated into home section, no banner needed
+    // This function is kept for backward compatibility
+    console.log('Privacy notice integrated into home section');
+}
 
 function initializeEventListeners() {
     // File upload events
@@ -56,8 +65,74 @@ function initializeAnimations() {
     cards.forEach((card, index) => {
         setTimeout(() => {
             card.classList.add('fade-in');
-        }, index * 200);
+            card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.2}s both`;
+        }, index * 100);
     });
+    
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+                
+                // Special animation for charts
+                if (entry.target.classList.contains('chart-container')) {
+                    animateChartEntry(entry.target);
+                }
+                
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all sections
+    document.querySelectorAll('section').forEach(section => {
+        observer.observe(section);
+    });
+    
+    // Observe chart containers
+    document.querySelectorAll('.chart-container, .chart-wrapper').forEach(chart => {
+        observer.observe(chart);
+    });
+    
+    // Add parallax effect to hero section
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const hero = document.querySelector('.hero');
+        if (hero) {
+            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            hero.style.opacity = 1 - (scrolled * 0.002);
+        }
+    });
+}
+
+// Chart entry animation
+function animateChartEntry(chartContainer) {
+    const canvas = chartContainer.querySelector('canvas');
+    if (canvas) {
+        // Add slide-up animation
+        canvas.style.transform = 'translateY(30px)';
+        canvas.style.opacity = '0';
+        canvas.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        
+        setTimeout(() => {
+            canvas.style.transform = 'translateY(0)';
+            canvas.style.opacity = '1';
+        }, 100);
+        
+        // Add pulse effect
+        setTimeout(() => {
+            canvas.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                canvas.style.transform = 'scale(1)';
+            }, 200);
+        }, 600);
+    }
 }
 
 // File handling functions
@@ -231,14 +306,23 @@ class LoadingManager {
 
     showPageLoader() {
         if (this.pageLoader) {
+            // Make visible and remove any fade-out state
+            this.pageLoader.classList.remove('fade-out');
             this.pageLoader.style.display = 'flex';
+            this.pageLoader.setAttribute('aria-hidden', 'false');
             this.startPageLoading();
         }
     }
 
     hidePageLoader() {
         if (this.pageLoader) {
-            this.pageLoader.style.display = 'none';
+            // Smoothly fade out using CSS, then remove from flow
+            this.pageLoader.classList.add('fade-out');
+            this.pageLoader.setAttribute('aria-hidden', 'true');
+            setTimeout(() => {
+                // After CSS transition, hide to remove from tab order
+                if (this.pageLoader) this.pageLoader.style.display = 'none';
+            }, 850); // match CSS transition timing
         }
     }
 
@@ -279,6 +363,13 @@ class LoadingManager {
             const circumference = 2 * Math.PI * 45; // radius = 45
             const offset = circumference - (this.loadingProgress / 100) * circumference;
             progressRing.style.strokeDashoffset = offset;
+            // Use theme-aware CSS variable if available
+            try {
+                const ringColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color') || getComputedStyle(document.documentElement).getPropertyValue('--progress-color') || '#3b82f6';
+                if (ringColor) progressRing.style.stroke = ringColor.trim();
+            } catch (e) {
+                // ignore in older browsers
+            }
         }
         
         if (progressText) {
@@ -291,6 +382,12 @@ class LoadingManager {
         
         if (techStatus && this.currentStep < this.loadingSteps.length) {
             techStatus.textContent = this.loadingSteps[this.currentStep].text;
+        }
+        
+        // Update progress label
+        const progressLabel = document.querySelector('.progress-label');
+        if (progressLabel && this.currentStep < this.loadingSteps.length) {
+            progressLabel.textContent = this.loadingSteps[this.currentStep].text;
         }
     }
 
@@ -776,14 +873,19 @@ function createBarChart(elementId, data, title) {
         return;
     }
     
+    // Get theme-aware colors
+    const isDarkTheme = document.body.getAttribute('data-theme') === 'dark';
+    const textColor = isDarkTheme ? '#e2e8f0' : '#1f2937';
+    const gridColor = isDarkTheme ? 'rgba(226, 232, 240, 0.1)' : 'rgba(31, 41, 55, 0.1)';
+    
     // Choose colors based on chart type
     let backgroundColor, borderColor;
     if (elementId.includes('risk')) {
         // Risk colors: green, yellow, red
         backgroundColor = [
-            'rgba(16, 185, 129, 0.8)',  // Green for low risk
-            'rgba(245, 158, 11, 0.8)',  // Yellow for medium risk
-            'rgba(239, 68, 68, 0.8)'    // Red for high risk
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(245, 158, 11, 0.8)',
+            'rgba(239, 68, 68, 0.8)'
         ];
         borderColor = [
             'rgba(16, 185, 129, 1)',
@@ -793,19 +895,33 @@ function createBarChart(elementId, data, title) {
     } else if (elementId.includes('performance')) {
         // Performance colors: blue gradient
         backgroundColor = [
-            'rgba(37, 99, 235, 0.8)',
-            'rgba(59, 130, 246, 0.8)',
-            'rgba(96, 165, 250, 0.8)'
+            'rgba(99, 102, 241, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(168, 85, 247, 0.8)'
         ];
         borderColor = [
-            'rgba(37, 99, 235, 1)',
-            'rgba(59, 130, 246, 1)',
-            'rgba(96, 165, 250, 1)'
+            'rgba(99, 102, 241, 1)',
+            'rgba(139, 92, 246, 1)',
+            'rgba(168, 85, 247, 1)'
         ];
     } else {
-        // Default fraud colors
-        backgroundColor = 'rgba(239, 68, 68, 0.8)';
-        borderColor = 'rgba(239, 68, 68, 1)';
+        // Fraud detection colors
+        backgroundColor = [
+            'rgba(255, 107, 107, 0.8)',
+            'rgba(78, 205, 196, 0.8)',
+            'rgba(69, 183, 209, 0.8)',
+            'rgba(150, 206, 180, 0.8)',
+            'rgba(254, 202, 87, 0.8)',
+            'rgba(255, 159, 243, 0.8)'
+        ];
+        borderColor = [
+            'rgba(255, 107, 107, 1)',
+            'rgba(78, 205, 196, 1)',
+            'rgba(69, 183, 209, 1)',
+            'rgba(150, 206, 180, 1)',
+            'rgba(254, 202, 87, 1)',
+            'rgba(255, 159, 243, 1)'
+        ];
     }
     
     new Chart(ctx, {
@@ -817,35 +933,151 @@ function createBarChart(elementId, data, title) {
                 data: data.values,
                 backgroundColor: backgroundColor,
                 borderColor: borderColor,
-                borderWidth: 1
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+                hoverBackgroundColor: backgroundColor.map(color => color.replace('0.8', '0.9')),
+                hoverBorderColor: borderColor,
+                hoverBorderWidth: 3
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+                duration: 1500,
+                easing: 'easeOutQuart'
+            },
             plugins: {
                 title: {
-                    display: false
+                    display: true,
+                    text: title,
+                    color: textColor,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    padding: 20
                 },
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    backgroundColor: isDarkTheme ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                    titleColor: textColor,
+                    bodyColor: textColor,
+                    borderColor: isDarkTheme ? 'rgba(139, 92, 246, 0.5)' : 'rgba(99, 102, 241, 0.5)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
+                        label: function(context) {
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y;
+                            const percentage = data.values.length > 0 ? ((value / data.values.reduce((a, b) => a + b, 0)) * 100).toFixed(1) : 0;
+                            
+                            let description = '';
+                            if (elementId.includes('amount')) {
+                                description = getAmountRangeDescription(context.label, value);
+                            } else if (elementId.includes('merchant')) {
+                                description = getMerchantDescription(context.label, value);
+                            } else if (elementId.includes('risk')) {
+                                description = getRiskDescription(context.label, value);
+                            } else if (elementId.includes('performance')) {
+                                description = getPerformanceDescription(context.label, value);
+                            }
+                            
+                            return [
+                                `${label}: ${value.toLocaleString()}`,
+                                `Percentage: ${percentage}%`,
+                                description
+                            ];
+                        }
+                    }
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
+                x: {
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            size: 12
+                        }
+                    },
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
+                        color: gridColor,
+                        borderColor: gridColor
                     }
                 },
-                x: {
+                y: {
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            size: 12
+                        }
+                    },
                     grid: {
-                        display: false
+                        color: gridColor,
+                        borderColor: gridColor
                     }
                 }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
             }
         }
     });
+}
+
+// Helper functions for chart tooltip descriptions
+function getAmountRangeDescription(label, value) {
+    const descriptions = {
+        '$0-$100': 'Small transactions - Often legitimate everyday purchases',
+        '$100-$500': 'Medium transactions - Regular shopping or bill payments',
+        '$500-$1000': 'Large transactions - Major purchases, rent, or significant expenses',
+        '$1000-$5000': 'Very large transactions - High-value purchases, often flagged for review',
+        '$5000+': 'Extremely large transactions - High fraud risk, requires verification'
+    };
+    return descriptions[label] || 'Transaction amount analysis helps identify fraud patterns';
+}
+
+function getMerchantDescription(label, value) {
+    if (value === 0) return 'No fraudulent transactions detected for this merchant';
+    if (value === 1) return 'Single fraud case - requires investigation';
+    if (value <= 5) return 'Low fraud volume - monitor for patterns';
+    if (value <= 10) return 'Moderate fraud activity - heightened security recommended';
+    return 'High fraud volume - immediate action required';
+}
+
+function getRiskDescription(label, value) {
+    const descriptions = {
+        'Low Risk (0-0.3)': 'Transactions with minimal fraud indicators - likely legitimate',
+        'Medium Risk (0.3-0.7)': 'Transactions with some suspicious patterns - review recommended',
+        'High Risk (0.7-1.0)': 'Transactions with strong fraud indicators - immediate verification needed'
+    };
+    return descriptions[label] || 'Risk scores help prioritize fraud detection efforts';
+}
+
+function getPerformanceDescription(label, value) {
+    const descriptions = {
+        'Accuracy': 'Overall model correctness - higher values indicate better fraud detection',
+        'Precision': 'True positives / (True positives + False positives) - reduces false alarms',
+        'Recall': 'True positives / (True positives + False negatives) - catches more fraud',
+        'F1-Score': 'Harmonic mean of precision and recall - balanced fraud detection metric',
+        'AUC': 'Area Under Curve - measures model discriminative ability'
+    };
+    return descriptions[label] || 'Performance metrics evaluate fraud detection effectiveness';
 }
 
 function createLineChart(elementId, data, title) {
@@ -931,12 +1163,24 @@ function createPieChart(elementId, data, title) {
                     'rgba(236, 72, 153, 0.8)'
                 ],
                 borderWidth: 2,
-                borderColor: '#ffffff'
+                borderColor: '#ffffff',
+                hoverBackgroundColor: [
+                    'rgba(239, 68, 68, 0.9)',
+                    'rgba(16, 185, 129, 0.9)',
+                    'rgba(245, 158, 11, 0.9)',
+                    'rgba(139, 92, 246, 0.9)',
+                    'rgba(236, 72, 153, 0.9)'
+                ],
+                hoverBorderWidth: 3
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart'
+            },
             plugins: {
                 title: {
                     display: false
@@ -947,9 +1191,45 @@ function createPieChart(elementId, data, title) {
                         padding: 15,
                         font: {
                             size: 12
+                        },
+                        color: document.body.getAttribute('data-theme') === 'dark' ? '#e2e8f0' : '#1f2937'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: document.body.getAttribute('data-theme') === 'dark' ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                    titleColor: document.body.getAttribute('data-theme') === 'dark' ? '#e2e8f0' : '#1f2937',
+                    bodyColor: document.body.getAttribute('data-theme') === 'dark' ? '#e2e8f0' : '#1f2937',
+                    borderColor: document.body.getAttribute('data-theme') === 'dark' ? 'rgba(139, 92, 246, 0.5)' : 'rgba(99, 102, 241, 0.5)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            
+                            let description = '';
+                            if (label.toLowerCase().includes('fraud')) {
+                                description = 'Fraudulent transactions detected by AI algorithms';
+                            } else if (label.toLowerCase().includes('normal') || label.toLowerCase().includes('legitimate')) {
+                                description = 'Legitimate transactions verified as safe';
+                            } else if (label.toLowerCase().includes('suspicious')) {
+                                description = 'Transactions requiring manual review';
+                            }
+                            
+                            return [
+                                `${label}: ${value.toLocaleString()}`,
+                                `Percentage: ${percentage}%`,
+                                description
+                            ];
                         }
                     }
                 }
+            },
+            interaction: {
+                mode: 'point'
             }
         }
     });
@@ -998,7 +1278,7 @@ function createDonutChart(elementId, data, title) {
 
 function downloadResults() {
     if (!processedData) {
-        showAlert('No results to download.', 'error');
+        showAlert('No results to download. Please analyze some data first.', 'error');
         return;
     }
     
@@ -1008,6 +1288,8 @@ function downloadResults() {
 function showDownloadModal() {
     const modal = document.getElementById('downloadModal');
     modal.style.display = 'block';
+    // Add show class for proper opacity animation
+    setTimeout(() => modal.classList.add('show'), 10);
     
     // Reset to format selection step
     document.getElementById('formatSelectionStep').style.display = 'block';
@@ -1017,7 +1299,24 @@ function showDownloadModal() {
 
 function closeDownloadModal() {
     const modal = document.getElementById('downloadModal');
-    modal.style.display = 'none';
+    modal.classList.remove('show');
+    
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 400);
+    
+    // Reset all steps
+    document.getElementById('formatSelectionStep').style.display = 'block';
+    document.getElementById('previewStep').style.display = 'none';
+    
+    const progressStep = document.getElementById('progressStep');
+    if (progressStep) {
+        progressStep.style.display = 'none';
+    }
+    
+    // Reset modal title
+    document.getElementById('modalTitle').textContent = '📥 Download Results';
 }
 
 let selectedFormat = '';
@@ -1100,17 +1399,33 @@ function generatePreview(format) {
 function generateCSVPreview(data) {
     const stats = data?.stats || { total: 0, fraud: 0, normal: 0 };
     const sampleData = data?.sample_data || [];
+    const currentDate = new Date();
     
-    let preview = `# =========================================
-# 🛡️ FraudShield - AI-Powered Fraud Detection
-# Advanced Machine Learning Fraud Analysis
-# =========================================
-# Report Generated: ${new Date().toLocaleString()}
-# Total Transactions: ${stats.total}
-# Fraud Detected: ${stats.fraud}
-# Normal Transactions: ${stats.normal}
-# =========================================
-
+    let preview = `# ╔══════════════════════════════════════════════════════════════╗
+# ║                    🛡️ FRAUDSHIELD REPORT                      ║
+# ║                AI-Powered Fraud Detection System              ║
+# ╚══════════════════════════════════════════════════════════════╝
+# 
+# Generated: ${currentDate.toLocaleString()}
+# Analysis Date: ${currentDate.toLocaleDateString()}
+# Analysis Time: ${currentDate.toLocaleTimeString()}
+# 
+# ═══════════════════ ANALYSIS SUMMARY ═══════════════════
+# Total Transactions Analyzed: ${stats.total}
+# Fraudulent Transactions Found: ${stats.fraud}
+# Legitimate Transactions: ${stats.normal}
+# Overall Fraud Detection Rate: ${stats.total > 0 ? ((stats.fraud/stats.total)*100).toFixed(2) : '0.00'}%
+# ═════════════════════════════════════════════════════════
+# 
+# CSV Data Structure:
+# - transaction_id: Unique identifier for each transaction
+# - amount: Transaction amount in currency
+# - merchant: Merchant or vendor name
+# - payment_method: Method used for payment
+# - fraud_prediction: 0 = Legitimate, 1 = Fraudulent
+# - risk_score: Fraud probability (0.0 - 1.0)
+# - confidence: Model confidence level
+# 
 `;
 
     // Add sample data if available
@@ -1123,94 +1438,173 @@ function generateCSVPreview(data) {
             preview += values.join(',') + '\n';
         });
         
-        preview += `... (${stats.total} total rows)\n`;
+        preview += `# ... (${stats.total} total transaction records)\n`;
     } else {
-        preview += `transaction_id,amount,merchant,payment_method,prediction,risk_score
-TXN_001,1500.00,Amazon,Credit Card,0,0.25
-TXN_002,15000.00,Unknown,Wire Transfer,1,0.89
-TXN_003,45.99,Starbucks,Debit Card,0,0.12
-... (${stats.total} total rows)
-`;
+        preview += `transaction_id,amount,merchant,payment_method,fraud_prediction,risk_score,confidence\n# (Full dataset with ${stats.total} analyzed transactions available in download)\n`;
     }
 
     preview += `
-# =========================================
-# DISCLAIMER
-# This analysis was generated using machine learning
-# algorithms and may contain prediction errors.
-# Results should be verified by domain experts
-# before making critical decisions.
-# =========================================`;
+# ═══════════════════════ DISCLAIMER ═══════════════════════
+# This fraud detection analysis was generated using advanced
+# machine learning algorithms and AI models. All predictions
+# should be verified by qualified fraud analysts before
+# making final decisions on transaction validity.
+# 
+# FRAUDSHIELD is not responsible for false positives or
+# false negatives in fraud detection results.
+# ═══════════════════════════════════════════════════════════`;
 
     return preview;
 }
 
 function generateExcelPreview(data) {
     const stats = data?.stats || { total: 0, fraud: 0, normal: 0 };
-    const fraudRate = stats.total > 0 ? ((stats.fraud/stats.total)*100).toFixed(1) : '0.0';
+    const fraudRate = stats.total > 0 ? ((stats.fraud/stats.total)*100).toFixed(2) : '0.00';
+    const currentDate = new Date();
     
-    return `📊 Excel File Structure:
+    return `📊 EXCEL WORKBOOK PREVIEW - FraudShield Analysis Report
 
-Sheet 1: Summary
-┌─────────────────────────────────────┐
-│ 🛡️ FraudShield Analysis Summary      │
-│ Generated: ${new Date().toLocaleDateString()}                │
-│                                     │
-│ Metric               │ Value        │
-│ ─────────────────────│──────────────│
-│ Total Transactions   │ ${stats.total.toString().padStart(12)} │
-│ Fraud Detected       │ ${stats.fraud.toString().padStart(12)} │
-│ Normal Transactions  │ ${stats.normal.toString().padStart(12)} │
-│ Fraud Rate %         │ ${fraudRate.padStart(12)} │
-└─────────────────────────────────────┘
+╔═════════════════════════════════════════════════════════════════════════════════════════╗
+║                                    🛡️ FRAUDSHIELD                                        ║
+║                          AI-Powered Financial Security Analysis                         ║
+║                                                                                         ║
+║   Generated: ${currentDate.toLocaleString()}                                     ║
+║   Analysis Date: ${currentDate.toLocaleDateString()}                                             ║
+║   Report Type: Comprehensive Fraud Detection Analysis                                  ║
+╚═════════════════════════════════════════════════════════════════════════════════════════╝
 
-Sheet 2: Detailed Results
-┌─────────────────────────────────────┐
-│ transaction_id │ amount │ prediction │
-│ ──────────────│────────│────────────│
-│ TXN_001       │ 1500.00│ 0 (Normal) │
-│ TXN_002       │15000.00│ 1 (Fraud)  │
-│ ... (${stats.total} total rows)              │
-└─────────────────────────────────────┘
+📋 WORKBOOK STRUCTURE:
 
-Sheet 3: Disclaimer
-Legal disclaimer and usage notes included.`;
+┌─ Sheet 1: EXECUTIVE SUMMARY
+│  ├─ Analysis Overview Dashboard
+│  ├─ Key Performance Indicators (KPIs)
+│  ├─ Transaction Volume Statistics
+│  ├─ Fraud Detection Metrics
+│  └─ Risk Assessment Summary
+│
+┌─ Sheet 2: DETAILED ANALYSIS
+│  ├─ Complete Transaction Dataset (${stats.total} records)
+│  ├─ Risk Score Distribution
+│  ├─ Fraud Prediction Results
+│  ├─ Confidence Level Analysis
+│  └─ Pattern Recognition Insights
+│
+┌─ Sheet 3: VISUALIZATION CHARTS
+│  ├─ Fraud vs Legitimate Transaction Breakdown
+│  ├─ Risk Score Histogram
+│  ├─ Transaction Amount Analysis
+│  ├─ Temporal Pattern Charts
+│  └─ Merchant Category Risk Assessment
+│
+└─ Sheet 4: TECHNICAL DETAILS
+   ├─ Model Configuration Parameters
+   ├─ Feature Importance Analysis
+   ├─ Algorithm Performance Metrics
+   ├─ Data Quality Assessment
+   └─ Validation Results
+
+📊 ANALYSIS HIGHLIGHTS:
+═══════════════════════════════════════════════════════════════════════════════════════════
+• Total Transactions Processed: ${stats.total.toLocaleString()}
+• Fraudulent Transactions Identified: ${stats.fraud.toLocaleString()}
+• Legitimate Transactions: ${stats.normal.toLocaleString()}
+• Overall Fraud Detection Rate: ${fraudRate}%
+• Analysis Confidence Level: High
+• Model Accuracy: Enterprise-grade AI validation
+═══════════════════════════════════════════════════════════════════════════════════════════
+
+🔒 DATA FEATURES INCLUDED:
+• Transaction ID & Timestamps
+• Transaction Amounts & Currency
+• Merchant Information & Categories
+• Payment Method Analysis
+• Fraud Probability Scores (0.00 - 1.00)
+• Model Confidence Ratings
+• Risk Classification Levels
+• Anomaly Detection Flags
+
+📈 ADVANCED ANALYTICS:
+• Statistical Pattern Recognition
+• Machine Learning Risk Assessment
+• Behavioral Anomaly Detection
+• Cross-Reference Validation
+• Time-Series Fraud Analysis
+• Merchant Risk Profiling
+
+⚠️  PROFESSIONAL DISCLAIMER:
+This fraud detection analysis was generated using state-of-the-art machine learning
+algorithms and artificial intelligence models. All predictions and risk assessments
+should be validated by qualified financial security analysts before making final
+determinations regarding transaction legitimacy.
+
+FRAUDSHIELD provides advanced fraud detection capabilities but cannot guarantee
+100% accuracy in all scenarios. Human oversight and domain expertise remain
+essential components of a comprehensive fraud prevention strategy.
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+                    📧 Contact: support@fraudshield.ai | 🌐 fraudshield.ai
+═══════════════════════════════════════════════════════════════════════════════════════════`;
 }
 
 function generatePDFPreview(data) {
     const stats = data?.stats || { total: 0, fraud: 0, normal: 0 };
     const fraudRate = stats.total > 0 ? ((stats.fraud/stats.total)*100).toFixed(1) : '0.0';
+    const currentDate = new Date();
+    const analysisDate = currentDate.toLocaleDateString();
+    const analysisTime = currentDate.toLocaleTimeString();
     
-    return `📋 PDF Report Structure:
+    return `📋 PDF Report Preview:
 
-┌─────────────────────────────────────┐
-│          FRAUDSHIELD REPORT         │
-│    AI-Powered Fraud Detection       │
-│                                     │
-│ Executive Summary:                  │
-│ • ${stats.total} transactions analyzed        │
-│ • ${stats.fraud} fraudulent transactions found│
-│ • ${fraudRate}% fraud rate                 │
-│                                     │
-│ Key Insights:                       │
-│ • Risk distribution analysis        │
-│ • Payment method patterns          │
-│ • Amount-based fraud detection     │
-│                                     │
-│ Charts & Visualizations:           │
-│ • Fraud by amount ranges           │
-│ • Risk score distribution          │
-│ • Model performance metrics        │
-│                                     │
-│ Detailed Transaction List:          │
-│ [Complete transaction data]         │
-│                                     │
-│ Disclaimer:                         │
-│ ML predictions - verify with experts│
-└─────────────────────────────────────┘
+╔══════════════════════════════════════════════════════════════╗
+║                    🛡️ FRAUDSHIELD REPORT                      ║
+║                AI-Powered Fraud Detection System              ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  Analysis Date: ${analysisDate}                                   ║
+║  Analysis Time: ${analysisTime}                                   ║
+║                                                              ║
+╠══════════════════════════════════════════════════════════════╣
+║  📊 EXECUTIVE SUMMARY                                        ║
+║                                                              ║
+║  Total Transactions Analyzed: ${stats.total.toString().padStart(8)}                     ║
+║  Fraudulent Transactions: ${stats.fraud.toString().padStart(12)}                        ║
+║  Legitimate Transactions: ${stats.normal.toString().padStart(12)}                       ║
+║  Overall Fraud Rate: ${fraudRate.padStart(15)}%                           ║
+║                                                              ║
+╠══════════════════════════════════════════════════════════════╣
+║  📈 ANALYSIS INSIGHTS                                        ║
+║                                                              ║
+║  • Risk Distribution Chart                                   ║
+║  • Fraud by Amount Range Graph                              ║
+║  • Merchant Analysis Visualization                          ║
+║  • ML Model Performance Metrics                             ║
+║                                                              ║
+╠══════════════════════════════════════════════════════════════╣
+║  📋 DETAILED TRANSACTION LIST                               ║
+║                                                              ║
+║  Complete dataset with fraud predictions                     ║
+║  Risk scores and confidence levels                          ║
+║  Transaction metadata and analysis                          ║
+║                                                              ║
+╠══════════════════════════════════════════════════════════════╣
+║  ⚠️  DISCLAIMER                                              ║
+║                                                              ║
+║  This analysis was generated using machine learning          ║
+║  algorithms. Results should be verified by domain           ║
+║  experts before making critical decisions.                  ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
 
-Note: PDF format provides a comprehensive
-professional report with charts and analysis.`;
+                     FRAUDSHIELD
+              Diagonal Watermark (Bottom-Left to Top-Right)
+           
+Note: The actual PDF will include:
+• Professional branding header with logo
+• Date/time stamp in top-right corner  
+• Statistical charts and visualizations
+• Complete transaction analysis data
+• Diagonal "FRAUDSHIELD" watermark overlay
+• Professional formatting and styling`;
 }
 
 function backToFormatSelection() {
@@ -1220,31 +1614,160 @@ function backToFormatSelection() {
 }
 
 function confirmDownload() {
-    if (!selectedFormat) {
-        showAlert('No format selected', 'error');
+    const format = selectedFormat;
+    if (!format) {
+        showAlert('Please select a format first.', 'error');
         return;
     }
     
-    // Show loading state
-    showAlert('Preparing download...', 'success');
+    // Check if we have processed data
+    if (!processedData) {
+        showAlert('No processed data available for download. Please analyze some data first.', 'error');
+        closeDownloadModal();
+        return;
+    }
     
-    // Create a form and submit it to trigger download
-    const form = document.createElement('form');
-    form.method = 'GET';
-    form.action = `/download?format=${selectedFormat}`;
-    form.style.display = 'none';
+    // Generate unique session ID
+    const sessionId = 'download_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+    // Show progress modal
+    showDownloadProgressModal(sessionId, format);
     
-    // Close modal
-    closeDownloadModal();
+    // Start download process
+    startDownloadProcess(sessionId, format);
+}
+
+function showDownloadProgressModal(sessionId, format) {
+    // Switch to progress view
+    document.getElementById('previewStep').style.display = 'none';
+    
+    // Create or show progress step
+    let progressStep = document.getElementById('progressStep');
+    if (!progressStep) {
+        progressStep = createProgressStepHTML();
+        document.querySelector('.modal-content').appendChild(progressStep);
+    }
+    
+    progressStep.style.display = 'block';
+    document.getElementById('modalTitle').textContent = `📥 Downloading ${format.toUpperCase()} Report`;
+    
+    // Reset progress
+    const progressBar = document.getElementById('downloadProgressBar');
+    const progressText = document.getElementById('downloadProgressText');
+    const progressMessage = document.getElementById('downloadProgressMessage');
+    
+    progressBar.style.width = '0%';
+    progressText.textContent = '0%';
+    progressMessage.textContent = 'Initializing download...';
+}
+
+function createProgressStepHTML() {
+    const progressStep = document.createElement('div');
+    progressStep.id = 'progressStep';
+    progressStep.style.display = 'none';
+    progressStep.innerHTML = `
+        <div class="progress-container" style="margin: 20px 0;">
+            <div class="progress-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-weight: 600; color: var(--text-color);">Download Progress</span>
+                <span id="downloadProgressText" style="font-weight: 600; color: var(--primary-color);">0%</span>
+            </div>
+            <div class="progress-bar-container" style="background: var(--card-border); border-radius: 10px; height: 8px; overflow: hidden;">
+                <div id="downloadProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--primary-light)); transition: width 0.3s ease; border-radius: 10px;"></div>
+            </div>
+            <div id="downloadProgressMessage" style="margin-top: 10px; font-size: 0.9rem; color: var(--text-light);">Initializing download...</div>
+        </div>
+    `;
+    return progressStep;
+}
+
+function startDownloadProcess(sessionId, format) {
+    // Start the download process
+    fetch(`/start-download?format=${format}&session_id=${sessionId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.session_id) {
+                // Start polling for progress
+                checkDownloadProgress(data.session_id, format);
+            } else {
+                throw new Error(data.error || 'Failed to start download');
+            }
+        })
+        .catch(error => {
+            console.error('Error starting download:', error);
+            showAlert('Failed to start download: ' + error.message, 'error');
+            closeDownloadModal();
+        });
+}
+
+function checkDownloadProgress(sessionId, format) {
+    const progressCheck = () => {
+        fetch(`/download-progress/${sessionId}`)
+            .then(response => response.json())
+            .then(data => {
+                updateProgressDisplay(data);
+                
+                if (data.status === 'completed') {
+                    // Download is ready
+                    setTimeout(() => {
+                        initiateFileDownload(format, sessionId);
+                        showDownloadComplete();
+                    }, 500);
+                } else if (data.status === 'error') {
+                    showAlert('Download failed: ' + data.message, 'error');
+                    closeDownloadModal();
+                } else {
+                    // Continue polling
+                    setTimeout(progressCheck, 1000);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking progress:', error);
+                showAlert('Error checking download progress', 'error');
+                closeDownloadModal();
+            });
+    };
+    
+    progressCheck();
+}
+
+function updateProgressDisplay(data) {
+    const progressBar = document.getElementById('downloadProgressBar');
+    const progressText = document.getElementById('downloadProgressText');
+    const progressMessage = document.getElementById('downloadProgressMessage');
+    
+    const progress = data.progress || 0;
+    
+    progressBar.style.width = progress + '%';
+    progressText.textContent = progress + '%';
+    progressMessage.textContent = data.message || 'Processing...';
+    
+    // Add animation effect
+    progressBar.style.transition = 'width 0.3s ease';
+}
+
+function initiateFileDownload(format, sessionId) {
+    const downloadUrl = `/download?format=${format}&session_id=${sessionId}`;
+    
+    // Create hidden link and trigger download
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `fraudshield_report_${new Date().toISOString().split('T')[0]}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function showDownloadComplete() {
+    const progressMessage = document.getElementById('downloadProgressMessage');
+    progressMessage.innerHTML = '✅ <strong>Download completed successfully!</strong>';
     
     // Show success message
+    showAlert('Report downloaded successfully!', 'success');
+    
+    // Close modal after a short delay
     setTimeout(() => {
-        showAlert('Download started successfully!', 'success');
-    }, 1000);
+        closeDownloadModal();
+    }, 2000);
 }
 
 function resetProcessing() {

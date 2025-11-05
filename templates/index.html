@@ -17,61 +17,88 @@
     <meta name="keywords" content="fraud detection, machine learning, pyspark, financial security, AI">
 </head>
 <body>
+    <!-- Floating Particles -->
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <!-- Mesh Overlay -->
+    <div class="mesh-overlay"></div>
+
     <!-- Page Loading Screen -->
     <div id="pageLoader" class="page-loader">
         <div class="loader-content">
-            <div class="loader-logo">
-                <div class="shield-icon">🛡️</div>
-                <h2>FraudShield</h2>
-                <p class="loader-subtitle">Initializing AI Security System</p>
-            </div>
-            
-            <div class="loader-progress">
-                <div class="progress-ring">
-                    <svg class="progress-ring-svg" width="120" height="120">
-                        <circle class="progress-ring-bg" cx="60" cy="60" r="45" stroke="#e5e7eb" stroke-width="4" fill="transparent"/>
-                        <circle class="progress-ring-fill" cx="60" cy="60" r="45" stroke="#3b82f6" stroke-width="4" fill="transparent" stroke-linecap="round"/>
-                    </svg>
-                    <div class="progress-text">
-                        <span id="loadingPercent">0</span>%
-                    </div>
+            <div class="loader-header">
+                <div class="loader-logo">
+                    <div class="shield-icon">🛡️</div>
+                    <h1>FraudShield</h1>
+                    <p class="loader-subtitle">AI-Powered Fraud Detection System</p>
                 </div>
                 
-                <div class="loading-steps">
+                <div class="loader-progress">
+                    <div class="progress-container">
+                        <div class="progress-ring">
+                            <svg class="progress-ring-svg" width="120" height="120">
+                                <circle class="progress-ring-bg" cx="60" cy="60" r="45" stroke="rgba(255,255,255,0.2)" stroke-width="4" fill="transparent"/>
+                                <circle class="progress-ring-fill" cx="60" cy="60" r="45" stroke="#3b82f6" stroke-width="4" fill="transparent" stroke-linecap="round"/>
+                            </svg>
+                            <div class="progress-text">
+                                <span id="loadingPercent">0</span>%
+                            </div>
+                        </div>
+                        <div class="progress-label">Initializing Security Protocols</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loader-steps">
+                <div class="step-container">
                     <div class="step active" id="step1">
                         <div class="step-icon">⚡</div>
-                        <span>Initializing System</span>
+                        <span class="step-text">System Initialization</span>
+                        <div class="step-indicator"></div>
                     </div>
                     <div class="step" id="step2">
                         <div class="step-icon">🔒</div>
-                        <span>Loading Security Modules</span>
+                        <span class="step-text">Security Modules</span>
+                        <div class="step-indicator"></div>
                     </div>
                     <div class="step" id="step3">
                         <div class="step-icon">🧠</div>
-                        <span>Preparing AI Engine</span>
+                        <span class="step-text">AI Engine</span>
+                        <div class="step-indicator"></div>
                     </div>
                     <div class="step" id="step4">
                         <div class="step-icon">✅</div>
-                        <span>System Ready</span>
+                        <span class="step-text">Ready to Launch</span>
+                        <div class="step-indicator"></div>
                     </div>
                 </div>
-                
-                <div class="loader-tech-info">
-                    <div class="tech-line">
-                        <span id="techStatus">Initializing core modules...</span>
-                    </div>
+            </div>
+            
+            <div class="loader-status">
+                <div class="status-display">
+                    <span id="techStatus">Booting fraud detection algorithms...</span>
                 </div>
             </div>
         </div>
         
         <div class="loader-background">
-            <div class="grid-pattern"></div>
-            <div class="floating-particles">
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
+            <div class="animated-grid"></div>
+            <div class="floating-elements">
+                <div class="float-element"></div>
+                <div class="float-element"></div>
+                <div class="float-element"></div>
+                <div class="float-element"></div>
+                <div class="float-element"></div>
+                <div class="float-element"></div>
             </div>
         </div>
     </div>
@@ -84,11 +111,21 @@
                 FraudShield
             </a>
             <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#upload">Upload</a></li>
-                <li><a href="#results">Results</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#upload" class="nav-link">Upload</a></li>
+                <li><a href="#results" class="nav-link">Results</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
             </ul>
+            
+            <!-- Theme Toggle -->
+            <div class="theme-toggle" id="themeToggle">
+                <div class="toggle-track">
+                    <div class="toggle-thumb">
+                        <span class="toggle-icon sun-icon">☀️</span>
+                        <span class="toggle-icon moon-icon">🌙</span>
+                    </div>
+                </div>
+            </div>
         </nav>
     </header>
 
@@ -107,6 +144,16 @@
             <div class="container">
                 <h1>🛡️ FraudShield</h1>
                 <p>Advanced AI-powered fraud detection system that analyzes financial transactions in real-time using cutting-edge machine learning algorithms.</p>
+                
+                <!-- Privacy Notice -->
+                <div class="privacy-notice">
+                    <div class="privacy-icon">🔒</div>
+                    <div class="privacy-content">
+                        <h3>Privacy & Security</h3>
+                        <p>Your uploaded files are processed locally on this server for analysis and are <strong>never stored permanently</strong>. Results are available for download only during your session. All data is automatically cleared after processing.</p>
+                    </div>
+                </div>
+                
                 <a href="#upload" class="btn btn-primary btn-lg">Start Analysis</a>
             </div>
         </section>
@@ -332,9 +379,11 @@
                 </div>
 
                 <!-- Download Button -->
-                <div style="text-align: center; margin: 2rem 0;">
-                    <button id="downloadBtn" class="btn btn-secondary">
-                        📥 Download Results
+                <div class="download-container">
+                    <button id="downloadBtn" class="btn btn-download" onclick="downloadResults()">
+                        <span class="btn-icon">📥</span>
+                        <span class="btn-text">Download Results</span>
+                        <span class="btn-glow"></span>
                     </button>
                 </div>
             </div>
@@ -423,86 +472,154 @@
             <div class="processing-card">
                 <div class="processing-header">
                     <div class="processing-icon">
-                        <div class="radar-scanner">
-                            <div class="scan-lines"></div>
+                        <div class="ai-brain">
+                            <div class="brain-pulse"></div>
+                            <div class="neural-network">
+                                <div class="neuron"></div>
+                                <div class="neuron"></div>
+                                <div class="neuron"></div>
+                                <div class="neuron"></div>
+                            </div>
                         </div>
                     </div>
-                    <h2>🔍 Analyzing Transactions</h2>
-                    <p class="processing-subtitle">AI-powered fraud detection in progress</p>
+                    <h2>🧠 AI Processing Transaction Data</h2>
+                    <p class="processing-subtitle">Advanced machine learning algorithms analyzing patterns</p>
                 </div>
                 
                 <div class="processing-metrics">
                     <div class="metric">
-                        <div class="metric-value">0</div>
-                        <div class="metric-label">Records</div>
+                        <div class="metric-icon">📊</div>
+                        <div class="metric-value" id="recordsProcessed">0</div>
+                        <div class="metric-label">Records Analyzed</div>
+                        <div class="metric-progress"></div>
                     </div>
                     <div class="metric">
-                        <div class="metric-value">0</div>
-                        <div class="metric-label">Patterns</div>
+                        <div class="metric-icon">🔍</div>
+                        <div class="metric-value" id="patternsFound">0</div>
+                        <div class="metric-label">Patterns Detected</div>
+                        <div class="metric-progress"></div>
                     </div>
                     <div class="metric">
-                        <div class="metric-value">0</div>
-                        <div class="metric-label">Flags</div>
+                        <div class="metric-icon">🚨</div>
+                        <div class="metric-value" id="fraudFlags">0</div>
+                        <div class="metric-label">Fraud Alerts</div>
+                        <div class="metric-progress"></div>
                     </div>
                 </div>
                 
                 <div class="progress-section">
-                    <div class="progress-circle">
-                        <svg class="progress-circle-svg" width="140" height="140">
-                            <circle class="progress-circle-bg" cx="70" cy="70" r="60" stroke="#e5e7eb" stroke-width="4" fill="transparent"/>
-                            <circle class="progress-circle-fill" cx="70" cy="70" r="60" stroke="#3b82f6" stroke-width="4" fill="transparent" stroke-linecap="round"/>
-                        </svg>
-                        <div class="progress-center">
-                            <div class="progress-percent">0%</div>
-                            <div class="progress-status">Initializing</div>
+                    <div class="main-progress">
+                        <div class="progress-circle">
+                            <svg class="progress-circle-svg" width="160" height="160">
+                                <circle class="progress-circle-bg" cx="80" cy="80" r="70" stroke="rgba(255,255,255,0.1)" stroke-width="3" fill="transparent"/>
+                                <circle class="progress-circle-fill" cx="80" cy="80" r="70" stroke="url(#gradient)" stroke-width="6" fill="transparent" stroke-linecap="round"/>
+                                <defs>
+                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#3b82f6"/>
+                                        <stop offset="100%" style="stop-color:#10b981"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="progress-center">
+                                <div class="progress-percent">0%</div>
+                                <div class="progress-status">Initializing AI</div>
+                            </div>
+                        </div>
+                        
+                        <div class="algorithm-display">
+                            <div class="algorithm-name">Deep Learning Fraud Detection</div>
+                            <div class="algorithm-details">Neural Network • Pattern Recognition • Risk Assessment</div>
                         </div>
                     </div>
                     
                     <div class="progress-stages">
-                        <div class="stage" id="stage1">
-                            <div class="stage-dot"></div>
-                            <span>Initializing fraud detection...</span>
+                        <div class="stage active" id="stage1">
+                            <div class="stage-dot">
+                                <div class="dot-pulse"></div>
+                            </div>
+                            <div class="stage-content">
+                                <span class="stage-title">Data Ingestion</span>
+                                <span class="stage-desc">Loading and validating transaction data</span>
+                            </div>
                         </div>
                         <div class="stage" id="stage2">
-                            <div class="stage-dot"></div>
-                            <span>Analyzing transaction patterns...</span>
+                            <div class="stage-dot">
+                                <div class="dot-pulse"></div>
+                            </div>
+                            <div class="stage-content">
+                                <span class="stage-title">Pattern Analysis</span>
+                                <span class="stage-desc">Identifying suspicious transaction patterns</span>
+                            </div>
                         </div>
                         <div class="stage" id="stage3">
-                            <div class="stage-dot"></div>
-                            <span>Applying ML algorithms...</span>
+                            <div class="stage-dot">
+                                <div class="dot-pulse"></div>
+                            </div>
+                            <div class="stage-content">
+                                <span class="stage-title">ML Processing</span>
+                                <span class="stage-desc">Applying neural network algorithms</span>
+                            </div>
                         </div>
                         <div class="stage" id="stage4">
-                            <div class="stage-dot"></div>
-                            <span>Generating fraud reports...</span>
+                            <div class="stage-dot">
+                                <div class="dot-pulse"></div>
+                            </div>
+                            <div class="stage-content">
+                                <span class="stage-title">Risk Assessment</span>
+                                <span class="stage-desc">Calculating fraud probability scores</span>
+                            </div>
                         </div>
                         <div class="stage" id="stage5">
-                            <div class="stage-dot"></div>
-                            <span>Finalizing results...</span>
+                            <div class="stage-dot">
+                                <div class="dot-pulse"></div>
+                            </div>
+                            <div class="stage-content">
+                                <span class="stage-title">Report Generation</span>
+                                <span class="stage-desc">Compiling comprehensive fraud report</span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="processing-details">
-                    <div class="detail-line">
-                        <span class="detail-label">Processing Time:</span>
-                        <span class="detail-value" id="processingTime">00:00</span>
+                <div class="processing-insights">
+                    <div class="insight-box">
+                        <div class="insight-icon">⏱️</div>
+                        <div class="insight-content">
+                            <div class="insight-label">Processing Time</div>
+                            <div class="insight-value" id="processingTime">00:00</div>
+                        </div>
                     </div>
-                    <div class="detail-line">
-                        <span class="detail-label">Current Stage:</span>
-                        <span class="detail-value" id="currentStage">Initialization</span>
+                    <div class="insight-box">
+                        <div class="insight-icon">🎯</div>
+                        <div class="insight-content">
+                            <div class="insight-label">Current Focus</div>
+                            <div class="insight-value" id="currentStage">Data Preparation</div>
+                        </div>
                     </div>
-                    <div class="detail-line">
-                        <span class="detail-label">Algorithm:</span>
-                        <span class="detail-value">Multi-Layer Fraud Detection</span>
+                    <div class="insight-box">
+                        <div class="insight-icon">💡</div>
+                        <div class="insight-content">
+                            <div class="insight-label">Confidence</div>
+                            <div class="insight-value" id="confidenceLevel">98.5%</div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="processing-log">
-                    <div class="log-item">[System] Fraud detection engine initialized</div>
+                    <div class="log-header">
+                        <span>🔍 Real-time Processing Log</span>
+                        <div class="log-indicator"></div>
+                    </div>
+                    <div class="log-content">
+                        <div class="log-item initial">[AI Engine] Fraud detection system initialized</div>
+                    </div>
                 </div>
                 
                 <div class="processing-actions">
-                    <button class="btn btn-cancel">❌ Cancel Processing</button>
+                    <button class="btn btn-cancel">
+                        <span class="btn-icon">⏹️</span>
+                        <span class="btn-text">Stop Analysis</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -552,6 +669,79 @@
     </footer>
 
     <!-- JavaScript -->
+    <script>
+        // Theme Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            
+            // Check for saved theme preference or default to 'light'
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            body.setAttribute('data-theme', currentTheme);
+            
+            // Theme toggle click handler
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                // Add animation class
+                body.classList.add('theme-transition');
+                
+                // Set new theme
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                // Remove animation class after transition
+                setTimeout(() => {
+                    body.classList.remove('theme-transition');
+                }, 500);
+            });
+            
+            // Navigation highlighting
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section[id]');
+            
+            function highlightCurrentSection() {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (scrollY >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            // Scroll event listener for navigation highlighting
+            window.addEventListener('scroll', highlightCurrentSection);
+            
+            // Click handlers for smooth scrolling
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                    
+                    // Update active state
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
     <script src="{{ url_for('static', filename='js/app.js') }}?v=3"></script>
 </body>
 </html>

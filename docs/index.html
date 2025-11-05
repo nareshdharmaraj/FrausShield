@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudShield - AI-Powered Fraud Detection System</title>
+    <meta name="description" content="Enterprise-grade fraud detection system using advanced machine learning and big data processing">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            padding: 6rem 0;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+            z-index: -1;
+        }
+
+        .hero-content h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-content .subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .hero-content .description {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-color);
+            border: 2px solid transparent;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            padding: 6rem 0;
+            background: var(--light-color);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .tech-item {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .tech-item img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .tech-item h4 {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-item p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Screenshots */
+        .screenshots {
+            padding: 6rem 0;
+            background: white;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .screenshot-card {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+        }
+
+        .screenshot-card:hover {
+            transform: scale(1.02);
+        }
+
+        .screenshot-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Installation */
+        .installation {
+            padding: 6rem 0;
+            background: var(--dark-color);
+            color: white;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-block::before {
+            content: 'Terminal';
+            position: absolute;
+            top: 0.5rem;
+            right: 1rem;
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .code-block code {
+            color: #10b981;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-content .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .hero-content .description {
+                font-size: 1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .features-grid,
+            .tech-grid,
+            .screenshot-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Scroll animations */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav container">
+            <a href="#" class="logo">
+                <i class="fas fa-shield-alt"></i>
+                FraudShield
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="#tech" class="nav-link">Technology</a></li>
+                <li><a href="#installation" class="nav-link">Installation</a></li>
+                <li><a href="https://github.com/nareshdharmaraj/FrausShield" target="_blank" class="nav-link">
+                    <i class="fab fa-github"></i> GitHub
+                </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content animate-fade-in">
+                <h1>🛡️ FraudShield</h1>
+                <p class="subtitle">AI-Powered Fraud Detection System</p>
+                <p class="description">
+                    Enterprise-grade fraud detection system using advanced machine learning and big data processing. 
+                    Protect your business with real-time transaction analysis and intelligent risk scoring.
+                </p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/nareshdharmaraj/FrausShield" target="_blank" class="btn btn-primary">
+                        <i class="fab fa-github"></i>
+                        View on GitHub
+                    </a>
+                    <a href="#installation" class="btn btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Features</h2>
+            <p class="section-subtitle scroll-animate">
+                Cutting-edge fraud detection capabilities powered by advanced AI and machine learning
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-card scroll-animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Advanced AI/ML</h3>
+                    <p>Multi-model ensemble including Random Forest, Logistic Regression, Isolation Forest, and K-Means clustering for superior accuracy.</p>
+                </div>
+
+                <div class="feature-card scroll-animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Real-time Processing</h3>
+                    <p>Process millions of transactions with sub-second latency using Apache Spark and optimized algorithms.</p>
+                </div>
+
+                <div class="feature-card scroll-animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Rich Analytics</h3>
+                    <p>Comprehensive dashboards with interactive charts, fraud trends, risk analytics, and performance metrics.</p>
+                </div>
+
+                <div class="feature-card scroll-animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Responsive Design</h3>
+                    <p>Beautiful, modern UI that works seamlessly across desktop, tablet, and mobile devices with dark/light theme support.</p>
+                </div>
+
+                <div class="feature-card scroll-animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-export"></i>
+                    </div>
+                    <h3>Multi-format Export</h3>
+                    <p>Export results in CSV, Excel, or PDF formats with branded reports and comprehensive analysis summaries.</p>
+                </div>
+
+                <div class="feature-card scroll-animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Enterprise Security</h3>
+                    <p>Production-grade security with GDPR compliance, secure data processing, and enterprise-ready architecture.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Stack -->
+    <section id="tech" class="tech-stack">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Technology Stack</h2>
+            <p class="section-subtitle scroll-animate">
+                Built with modern technologies for scalability and performance
+            </p>
+            
+            <div class="tech-grid">
+                <div class="tech-item scroll-animate">
+                    <i class="fab fa-python" style="font-size: 3rem; color: #3776ab; margin-bottom: 1rem;"></i>
+                    <h4>Python 3.8+</h4>
+                    <p>Core programming language</p>
+                </div>
+
+                <div class="tech-item scroll-animate">
+                    <i class="fas fa-fire" style="font-size: 3rem; color: #e25a1c; margin-bottom: 1rem;"></i>
+                    <h4>Apache Spark</h4>
+                    <p>Big data processing</p>
+                </div>
+
+                <div class="tech-item scroll-animate">
+                    <i class="fas fa-flask" style="font-size: 3rem; color: #000; margin-bottom: 1rem;"></i>
+                    <h4>Flask</h4>
+                    <p>Web framework</p>
+                </div>
+
+                <div class="tech-item scroll-animate">
+                    <i class="fas fa-robot" style="font-size: 3rem; color: #ff6b6b; margin-bottom: 1rem;"></i>
+                    <h4>Scikit-learn</h4>
+                    <p>Machine learning</p>
+                </div>
+
+                <div class="tech-item scroll-animate">
+                    <i class="fas fa-chart-bar" style="font-size: 3rem; color: #4ecdc4; margin-bottom: 1rem;"></i>
+                    <h4>Pandas</h4>
+                    <p>Data analysis</p>
+                </div>
+
+                <div class="tech-item scroll-animate">
+                    <i class="fab fa-js-square" style="font-size: 3rem; color: #f7df1e; margin-bottom: 1rem;"></i>
+                    <h4>Chart.js</h4>
+                    <p>Data visualization</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation -->
+    <section id="installation" class="installation">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">Quick Start</h2>
+            <p class="section-subtitle" style="color: rgba(255, 255, 255, 0.8);">
+                Get FraudShield up and running in minutes
+            </p>
+
+            <div class="scroll-animate">
+                <h3 style="color: white; margin-bottom: 1rem;">1. Clone the Repository</h3>
+                <div class="code-block">
+                    <code>git clone https://github.com/nareshdharmaraj/FrausShield.git<br>
+cd FrausShield</code>
+                </div>
+            </div>
+
+            <div class="scroll-animate">
+                <h3 style="color: white; margin-bottom: 1rem;">2. Install Dependencies</h3>
+                <div class="code-block">
+                    <code>pip install -r requirements.txt</code>
+                </div>
+            </div>
+
+            <div class="scroll-animate">
+                <h3 style="color: white; margin-bottom: 1rem;">3. Run the Application</h3>
+                <div class="code-block">
+                    <code>python app.py</code>
+                </div>
+            </div>
+
+            <div class="scroll-animate">
+                <h3 style="color: white; margin-bottom: 1rem;">4. Access the Interface</h3>
+                <div class="code-block">
+                    <code>Open your browser and navigate to: http://localhost:5000</code>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/nareshdharmaraj/FrausShield" target="_blank" class="footer-link">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <a href="https://github.com/nareshdharmaraj/FrausShield/issues" target="_blank" class="footer-link">
+                    <i class="fas fa-bug"></i> Issues
+                </a>
+                <a href="https://github.com/nareshdharmaraj/FrausShield/blob/main/docs/" target="_blank" class="footer-link">
+                    <i class="fas fa-book"></i> Documentation
+                </a>
+            </div>
+            <p>&copy; 2025 FraudShield. Built with ❤️ for financial security.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-animate').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.98)';
+                header.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

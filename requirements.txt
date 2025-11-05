@@ -16,6 +16,10 @@ scikit-learn>=1.0.0
 matplotlib>=3.5.0
 seaborn>=0.11.0
 
+# PDF Generation
+reportlab>=4.0.0
+pillow>=10.0.0
+
 # Additional Utilities
 python-dateutil>=2.8.0
 joblib>=1.0.0
