@@ -10,7 +10,7 @@
 
 **Enterprise-grade fraud detection system using advanced machine learning and big data processing**
 
-[🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [⚡ Features](#-features) • [🤖 Demo](#-demo)
+[🚀 Quick Start](#-quick-start) • [⚡ Features](#-features) • [🏗️ Architecture](#️-architecture) • [📋 Modules](#-modules)
 
 </div>
 
@@ -79,11 +79,6 @@ FraudShield/
 │   ├── data/                   # Sample datasets
 │   ├── uploads/                # User uploaded files
 │   └── results/                # Generated fraud reports
-│
-├── 📚 Documentation
-│   ├── docs/                   # Technical documentation
-│   ├── README.md               # This file
-│   └── requirements.txt        # Dependencies
 │
 └── 🧪 Testing
     └── tests/                  # Integration tests
@@ -250,22 +245,7 @@ Open your browser and navigate to: **http://localhost:5000**
 
 ---
 
-## 📖 Documentation
-
-### 📚 Available Documentation
-- **[Technical Architecture](docs/PROJECT_SUMMARY.md)**: Detailed system architecture and design
-- **[Setup Guide](docs/SETUP.md)**: Comprehensive installation instructions
-- **[API Documentation](docs/API.md)**: REST API endpoints and usage
-- **[Contributing Guide](docs/CONTRIBUTING.md)**: Guidelines for contributors
-
-### 🔗 Quick Links
-- **[Live Demo](http://localhost:5000)**: Try FraudShield in your browser
-- **[GitHub Repository](https://github.com/nareshdharmaraj/FrausShield)**: Source code and issues
-- **[Documentation Site](docs/)**: Complete documentation portal
-
----
-
-## 🛠️ Technology Stack
+## ️ Technology Stack
 
 ### Backend
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
@@ -305,7 +285,7 @@ Open your browser and navigate to: **http://localhost:5000**
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details.
+We welcome contributions! Please follow these steps:
 
 ### 🔧 Development Setup
 1. Fork the repository
@@ -319,7 +299,7 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ---
 
@@ -332,21 +312,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support & Contact
-
-- **📧 Email**: naresh.dharmaraj@example.com
-- **🐛 Issues**: [GitHub Issues](https://github.com/nareshdharmaraj/FrausShield/issues)
-- **💬 Discussions**: [GitHub Discussions](https://github.com/nareshdharmaraj/FrausShield/discussions)
-- **📱 LinkedIn**: [Connect with Developer](https://linkedin.com/in/nareshdharmaraj)
-
----
-
 <div align="center">
 
 ### ⭐ Star this repository if you find it helpful!
 
 **Made with ❤️ by [Naresh Dharmaraj](https://github.com/nareshdharmaraj)**
-
-![Visitors](https://visitor-badge.laobi.icu/badge?page_id=nareshdharmaraj.FrausShield)
 
 </div>
