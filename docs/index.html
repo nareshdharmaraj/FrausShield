@@ -173,22 +173,37 @@
                         <p>Experience the FraudShield interface and features</p>
                     </div>
                     <div class="card-body">
-                        <!-- Demo Notice -->
-                        <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 2rem; border-radius: 16px; text-align: center; margin-bottom: 2rem;">
-                            <h3 style="margin: 0 0 1rem 0;">🚀 This is a Static Demo</h3>
-                            <p style="margin: 0; font-size: 1.1rem;">This GitHub Pages site showcases the FraudShield interface. For full functionality including file upload and real-time fraud detection, please run the application locally using the installation instructions below.</p>
+                        <!-- Fully Functional Notice -->
+                        <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 2rem; border-radius: 16px; text-align: center; margin-bottom: 2rem;">
+                            <h3 style="margin: 0 0 1rem 0;">🚀 Fully Functional Fraud Detection</h3>
+                            <p style="margin: 0; font-size: 1.1rem;">Upload your CSV files and get real-time fraud analysis powered by client-side machine learning algorithms. No server required!</p>
                         </div>
                         
+                        
                         <!-- Demo Upload Area -->
-                        <div id="uploadArea" class="upload-area" style="opacity: 0.7; pointer-events: none;">
+                        <div id="uploadArea" class="upload-area">
                             <div class="upload-icon">📁</div>
                             <div class="upload-text">
-                                <strong>Demo Mode</strong> - File upload available in local installation
+                                <strong>Drop your CSV file here</strong><br>
+                                <span style="font-size: 0.9rem; opacity: 0.8;">or click to browse files</span>
                             </div>
-                            <div class="upload-text">
-                                Download the source code to run full version
-                            </div>
+                            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+                            <div id="fileName" style="display: none; margin-top: 1rem; font-weight: 600; color: var(--primary-color);"></div>
                         </div>
+                        
+                        <!-- Progress Container -->
+                        <div id="progressContainer" style="display: none; margin-top: 2rem;">
+                            <div style="background: var(--light-color); border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
+                                <div id="progressFill" style="width: 0%; height: 8px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); transition: width 0.3s ease;"></div>
+                            </div>
+                            <div class="progress-message" style="text-align: center; color: var(--text-light);"></div>
+                        </div>
+                        
+                        <!-- Process Button -->
+                        <button id="processBtn" class="btn btn-outline btn-lg" disabled style="margin-top: 2rem; width: 100%;">
+                            <span class="btn-icon">🔍</span>
+                            <span class="btn-text">Select a file to analyze</span>
+                        </button>
                         
                         <!-- Installation Instructions -->
                         <div style="margin-top: 2rem; padding: 2rem; background: var(--light-color); border-radius: 12px;">
