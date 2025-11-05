@@ -13,6 +13,9 @@ const resultsSection = document.getElementById('results'); // Fixed: changed fro
 
 // Initialize event listeners
 document.addEventListener('DOMContentLoaded', function() {
+    // Always scroll to top on page load
+    window.scrollTo(0, 0);
+    
     initializeEventListeners();
     initializeAnimations();
     
@@ -22,7 +25,37 @@ document.addEventListener('DOMContentLoaded', function() {
     // Start automatic connection checking
     checkConnectionOnLoad();
     startConnectionMonitoring();
+    
+    // Add reload warning
+    initializeReloadWarning();
 });
+
+function initializeReloadWarning() {
+    // Warn user about data loss on page reload
+    window.addEventListener('beforeunload', function(e) {
+        if (uploadedFile || processedData) {
+            const message = 'You have uploaded files or processed data that will be lost if you reload the page. Are you sure you want to continue?';
+            e.preventDefault();
+            e.returnValue = message;
+            return message;
+        }
+    });
+    
+    // Handle browser refresh button specifically
+    const refreshButtons = document.querySelectorAll('[data-action="refresh"], .refresh-btn');
+    refreshButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (uploadedFile || processedData) {
+                if (confirm('All uploaded files and processed data will be lost. Do you want to continue?')) {
+                    window.location.reload();
+                }
+            } else {
+                window.location.reload();
+            }
+        });
+    });
+}
 
 function initializePrivacyBanner() {
     // Privacy notice is now integrated into home section, no banner needed
@@ -50,6 +83,12 @@ function initializeEventListeners() {
         downloadBtn.addEventListener('click', downloadResults);
     }
     
+    // PySpark toggle
+    const pysparkToggle = document.getElementById('pysparkToggle');
+    if (pysparkToggle) {
+        pysparkToggle.addEventListener('change', handlePySparkToggle);
+    }
+    
     // Modal click outside to close
     window.addEventListener('click', function(event) {
         const modal = document.getElementById('downloadModal');
@@ -57,6 +96,51 @@ function initializeEventListeners() {
             closeDownloadModal();
         }
     });
+}
+
+function handlePySparkToggle(event) {
+    const isEnabled = event.target.checked;
+    const toggleDescription = document.querySelector('.toggle-description');
+    
+    if (isEnabled) {
+        toggleDescription.textContent = 'PySpark enabled: Advanced ML algorithms and large dataset processing active';
+        toggleDescription.style.color = 'var(--success-color)';
+        console.log('🚀 PySpark processing enabled');
+        
+        // Show notification
+        showNotification('PySpark mode enabled! Advanced ML algorithms will be used for processing.', 'success');
+    } else {
+        toggleDescription.textContent = 'Enable PySpark for large dataset processing and advanced ML algorithms';
+        toggleDescription.style.color = 'var(--text-color-secondary)';
+        console.log('⚡ Basic processing mode enabled');
+        
+        // Show notification
+        showNotification('Basic mode enabled. Processing will use standard algorithms.', 'info');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${type === 'success' ? '✅' : 'ℹ️'}</span>
+            <span class="notification-message">${message}</span>
+        </div>
+    `;
+    
+    // Add to document
+    document.body.appendChild(notification);
+    
+    // Show animation
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Auto remove
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 3000);
 }
 
 function initializeAnimations() {
@@ -293,10 +377,11 @@ class LoadingManager {
         this.pageLoader = document.getElementById('pageLoader');
         this.processingInterface = null;
         this.loadingSteps = [
-            { id: 'system', text: 'Initializing fraud detection system...' },
-            { id: 'security', text: 'Loading security protocols...' },
-            { id: 'algorithms', text: 'Preparing ML algorithms...' },
-            { id: 'interface', text: 'Finalizing user interface...' }
+            { id: 'neural', text: 'Initializing neural network architecture...' },
+            { id: 'algorithms', text: 'Loading advanced ML algorithms...' },
+            { id: 'security', text: 'Activating fraud detection protocols...' },
+            { id: 'ai', text: 'Calibrating AI security intelligence...' },
+            { id: 'interface', text: 'Finalizing professional interface...' }
         ];
         this.currentStep = 0;
         this.loadingProgress = 0;
@@ -354,41 +439,87 @@ class LoadingManager {
     }
 
     updatePageLoader() {
+        const progressFill = document.querySelector('.progress-fill');
+        const loadingPercent = document.getElementById('loadingPercent');
+        const loadingStage = document.getElementById('loadingStage');
+        const techStatus = document.getElementById('techStatus');
+        
+        // Update circular progress ring
+        if (progressFill) {
+            const circumference = 2 * Math.PI * 50; // radius = 50
+            const offset = circumference - (this.loadingProgress / 100) * circumference;
+            progressFill.style.strokeDashoffset = offset;
+        }
+        
+        // Update percentage display
+        if (loadingPercent) {
+            loadingPercent.textContent = Math.round(this.loadingProgress);
+        }
+        
+        // Update loading stage text
+        if (loadingStage && this.currentStep < this.loadingSteps.length) {
+            loadingStage.textContent = this.loadingSteps[this.currentStep].text;
+        }
+        
+        // Update terminal status
+        if (techStatus && this.currentStep < this.loadingSteps.length) {
+            techStatus.textContent = this.loadingSteps[this.currentStep].text;
+        }
+        
+        // Animate neurons based on progress
+        this.animateNeuralNetwork();
+        
+        // Legacy support for old elements
         const progressRing = document.querySelector('.progress-ring-fill');
         const progressText = document.querySelector('.progress-text');
-        const loadingPercent = document.getElementById('loadingPercent');
-        const techStatus = document.querySelector('#techStatus');
         
         if (progressRing) {
-            const circumference = 2 * Math.PI * 45; // radius = 45
+            const circumference = 2 * Math.PI * 45;
             const offset = circumference - (this.loadingProgress / 100) * circumference;
             progressRing.style.strokeDashoffset = offset;
-            // Use theme-aware CSS variable if available
-            try {
-                const ringColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color') || getComputedStyle(document.documentElement).getPropertyValue('--progress-color') || '#3b82f6';
-                if (ringColor) progressRing.style.stroke = ringColor.trim();
-            } catch (e) {
-                // ignore in older browsers
-            }
         }
         
         if (progressText) {
             progressText.textContent = `${Math.round(this.loadingProgress)}%`;
         }
         
-        if (loadingPercent) {
-            loadingPercent.textContent = Math.round(this.loadingProgress);
+        const waveContainer = document.querySelector('.wave-container');
+        if (waveContainer) {
+            const waveHeight = (this.loadingProgress / 100) * 100;
+            waveContainer.style.height = `${waveHeight}%`;
         }
         
-        if (techStatus && this.currentStep < this.loadingSteps.length) {
-            techStatus.textContent = this.loadingSteps[this.currentStep].text;
+        const timelineLine = document.querySelector('.timeline-line');
+        if (timelineLine) {
+            timelineLine.style.setProperty('--timeline-progress', `${this.loadingProgress}%`);
         }
         
-        // Update progress label
         const progressLabel = document.querySelector('.progress-label');
         if (progressLabel && this.currentStep < this.loadingSteps.length) {
             progressLabel.textContent = this.loadingSteps[this.currentStep].text;
         }
+        
+        const mainLoadingPercent = document.querySelector('.loading-percent');
+        if (mainLoadingPercent) {
+            mainLoadingPercent.textContent = `${Math.round(this.loadingProgress)}%`;
+        }
+    }
+
+    animateNeuralNetwork() {
+        const neurons = document.querySelectorAll('.neuron');
+        const progressRatio = this.loadingProgress / 100;
+        
+        neurons.forEach((neuron, index) => {
+            const delay = (index * 100) * progressRatio;
+            const shouldActivate = (index / neurons.length) <= progressRatio;
+            
+            if (shouldActivate) {
+                neuron.style.animationDelay = `${delay}ms`;
+                neuron.classList.add('active');
+            } else {
+                neuron.classList.remove('active');
+            }
+        });
     }
 
     activateNextStep() {
@@ -694,8 +825,17 @@ async function processFileWithUserInput() {
         formData.append('file', uploadedFile);
         
         // Add user input configuration if available
-        if (window.userFraudConfig) {
-            formData.append('user_config', JSON.stringify(window.userFraudConfig));
+        const userConfig = window.userFraudConfig || {};
+        
+        // Add PySpark setting from toggle
+        const pysparkToggle = document.getElementById('pysparkToggle');
+        if (pysparkToggle) {
+            userConfig.use_pyspark = pysparkToggle.checked;
+        }
+        
+        if (Object.keys(userConfig).length > 0) {
+            formData.append('user_config', JSON.stringify(userConfig));
+            console.log('🎯 User configuration sent:', userConfig);
         }
         
         // Upload and process file with timeout
@@ -1681,10 +1821,18 @@ function createProgressStepHTML() {
 }
 
 function startDownloadProcess(sessionId, format) {
+    console.log(`🚀 Starting download process: format=${format}, sessionId=${sessionId}`);
+    
     // Start the download process
     fetch(`/start-download?format=${format}&session_id=${sessionId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('📋 Download start response:', data);
             if (data.session_id) {
                 // Start polling for progress
                 checkDownloadProgress(data.session_id, format);
@@ -1702,17 +1850,25 @@ function startDownloadProcess(sessionId, format) {
 function checkDownloadProgress(sessionId, format) {
     const progressCheck = () => {
         fetch(`/download-progress/${sessionId}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('📊 Download progress update:', data);
                 updateProgressDisplay(data);
                 
                 if (data.status === 'completed') {
+                    console.log('✅ Download completed, initiating file download');
                     // Download is ready
                     setTimeout(() => {
                         initiateFileDownload(format, sessionId);
                         showDownloadComplete();
                     }, 500);
                 } else if (data.status === 'error') {
+                    console.error('❌ Download error:', data.message);
                     showAlert('Download failed: ' + data.message, 'error');
                     closeDownloadModal();
                 } else {
@@ -1722,7 +1878,7 @@ function checkDownloadProgress(sessionId, format) {
             })
             .catch(error => {
                 console.error('Error checking progress:', error);
-                showAlert('Error checking download progress', 'error');
+                showAlert('Error checking download progress: ' + error.message, 'error');
                 closeDownloadModal();
             });
     };
@@ -1748,13 +1904,54 @@ function updateProgressDisplay(data) {
 function initiateFileDownload(format, sessionId) {
     const downloadUrl = `/download?format=${format}&session_id=${sessionId}`;
     
-    // Create hidden link and trigger download
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = `fraudshield_report_${new Date().toISOString().split('T')[0]}.${format}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    console.log('🔗 Initiating download:', downloadUrl);
+    
+    // First try using fetch to check if the file is ready
+    fetch(downloadUrl, { method: 'HEAD' })
+        .then(response => {
+            if (response.ok) {
+                // File is ready, proceed with download
+                triggerDownload(downloadUrl, format);
+            } else {
+                throw new Error(`Download not ready: ${response.status}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error checking download readiness:', error);
+            // Try direct download anyway
+            triggerDownload(downloadUrl, format);
+        });
+}
+
+function triggerDownload(downloadUrl, format) {
+    try {
+        // Create hidden link and trigger download
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `fraudshield_report_${new Date().toISOString().split('T')[0]}.${format}`;
+        link.style.display = 'none';
+        
+        // Add event listeners to track download
+        link.addEventListener('click', () => {
+            console.log('✅ Download link clicked');
+        });
+        
+        document.body.appendChild(link);
+        
+        // Trigger the download
+        link.click();
+        
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(link);
+        }, 1000);
+        
+        console.log('📥 Download triggered successfully');
+        
+    } catch (error) {
+        console.error('Error triggering download:', error);
+        showAlert('Failed to download file. Please try again.', 'error');
+    }
 }
 
 function showDownloadComplete() {
@@ -1832,6 +2029,8 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
+            // Update active nav state
+            updateNavActiveState(this.getAttribute('href'));
             target.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
@@ -1840,14 +2039,61 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Header scroll effect
+// Function to update navigation active state
+function updateNavActiveState(targetHref) {
+    // Remove active class from all nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Add active class to the clicked nav link
+    const activeLink = document.querySelector(`a[href="${targetHref}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+}
+
+// Scroll spy to update nav based on current section
+function handleScrollSpy() {
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
+    
+    let currentSection = '';
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100; // Account for header height
+        const sectionHeight = section.offsetHeight;
+        
+        if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+            currentSection = section.getAttribute('id');
+        }
+    });
+    
+    // If we're at the top of the page, set home as active
+    if (window.scrollY < 200) {
+        currentSection = 'home';
+    }
+    
+    // Update nav active states
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('active');
+        }
+    });
+}
+
+// Header scroll effect - Enhanced for better visibility
 window.addEventListener('scroll', function() {
     const header = document.querySelector('.header');
     if (window.scrollY > 100) {
-        header.style.background = 'rgba(255, 255, 255, 0.98)';
+        header.classList.add('scrolled');
     } else {
-        header.style.background = 'rgba(255, 255, 255, 0.95)';
+        header.classList.remove('scrolled');
     }
+    
+    // Handle scroll spy
+    handleScrollSpy();
 });
 
 // User Input Modal Functions

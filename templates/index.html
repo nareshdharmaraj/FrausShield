@@ -32,72 +32,158 @@
     <!-- Mesh Overlay -->
     <div class="mesh-overlay"></div>
 
-    <!-- Page Loading Screen -->
+    <!-- Advanced Professional Loading Screen -->
     <div id="pageLoader" class="page-loader">
         <div class="loader-content">
-            <div class="loader-header">
-                <div class="loader-logo">
-                    <div class="shield-icon">🛡️</div>
-                    <h1>FraudShield</h1>
-                    <p class="loader-subtitle">AI-Powered Fraud Detection System</p>
+            <!-- Central Logo with Advanced Animation -->
+            <div class="advanced-logo-container">
+                <div class="shield-core">
+                    <div class="shield-layers">
+                        <div class="shield-layer layer-1"></div>
+                        <div class="shield-layer layer-2"></div>
+                        <div class="shield-layer layer-3"></div>
+                    </div>
+                    <div class="shield-center">
+                        <div class="shield-icon">🛡️</div>
+                        <div class="scan-lines"></div>
+                        <div class="hologram-effect"></div>
+                    </div>
+                    <div class="energy-particles">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                        <div class="particle particle-6"></div>
+                    </div>
                 </div>
                 
-                <div class="loader-progress">
-                    <div class="progress-container">
-                        <div class="progress-ring">
-                            <svg class="progress-ring-svg" width="120" height="120">
-                                <circle class="progress-ring-bg" cx="60" cy="60" r="45" stroke="rgba(255,255,255,0.2)" stroke-width="4" fill="transparent"/>
-                                <circle class="progress-ring-fill" cx="60" cy="60" r="45" stroke="#3b82f6" stroke-width="4" fill="transparent" stroke-linecap="round"/>
-                            </svg>
-                            <div class="progress-text">
-                                <span id="loadingPercent">0</span>%
-                            </div>
+                <div class="brand-container">
+                    <h1 class="brand-title-advanced">
+                        <span class="brand-main">FraudShield</span>
+                        <span class="brand-subtitle">AI-Powered Security Intelligence</span>
+                    </h1>
+                </div>
+            </div>
+            
+            <!-- Advanced Progress System -->
+            <div class="progress-system">
+                <div class="neural-progress">
+                    <div class="progress-ring">
+                        <svg class="progress-svg" width="120" height="120">
+                            <defs>
+                                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#3b82f6"/>
+                                    <stop offset="50%" style="stop-color:#8b5cf6"/>
+                                    <stop offset="100%" style="stop-color:#10b981"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="progress-bg" cx="60" cy="60" r="50" />
+                            <circle class="progress-fill" cx="60" cy="60" r="50" />
+                        </svg>
+                        <div class="progress-center">
+                            <span id="loadingPercent" class="progress-value">0</span>
+                            <span class="progress-unit">%</span>
                         </div>
-                        <div class="progress-label">Initializing Security Protocols</div>
+                    </div>
+                    
+                    <div class="loading-status">
+                        <div id="loadingStage" class="status-text">Initializing Neural Networks</div>
+                        <div class="status-dots">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <div class="loader-steps">
-                <div class="step-container">
-                    <div class="step active" id="step1">
-                        <div class="step-icon">⚡</div>
-                        <span class="step-text">System Initialization</span>
-                        <div class="step-indicator"></div>
+            <!-- AI Processing Visualization -->
+            <div class="ai-visualization">
+                <div class="neural-network-display">
+                    <div class="neuron-layer input-layer">
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
                     </div>
-                    <div class="step" id="step2">
-                        <div class="step-icon">🔒</div>
-                        <span class="step-text">Security Modules</span>
-                        <div class="step-indicator"></div>
+                    <div class="neuron-layer hidden-layer-1">
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
                     </div>
-                    <div class="step" id="step3">
-                        <div class="step-icon">🧠</div>
-                        <span class="step-text">AI Engine</span>
-                        <div class="step-indicator"></div>
+                    <div class="neuron-layer hidden-layer-2">
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
                     </div>
-                    <div class="step" id="step4">
-                        <div class="step-icon">✅</div>
-                        <span class="step-text">Ready to Launch</span>
-                        <div class="step-indicator"></div>
+                    <div class="neuron-layer output-layer">
+                        <div class="neuron"></div>
+                        <div class="neuron"></div>
                     </div>
+                    <svg class="connections" width="100%" height="100%">
+                        <!-- Connections will be drawn here via JavaScript -->
+                    </svg>
                 </div>
             </div>
             
-            <div class="loader-status">
-                <div class="status-display">
-                    <span id="techStatus">Booting fraud detection algorithms...</span>
+            <!-- System Status Terminal -->
+            <div class="status-terminal">
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="window-controls">
+                            <div class="control-dot close"></div>
+                            <div class="control-dot minimize"></div>
+                            <div class="control-dot maximize"></div>
+                        </div>
+                        <div class="terminal-title">FraudShield Core v3.0</div>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="terminal-line">
+                            <span class="prompt">root@fraudshield:~#</span>
+                            <span id="techStatus" class="command">Loading AI security protocols...</span>
+                            <span class="cursor"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         
+        <!-- Advanced Background Effects -->
         <div class="loader-background">
-            <div class="animated-grid"></div>
-            <div class="floating-elements">
-                <div class="float-element"></div>
-                <div class="float-element"></div>
-                <div class="float-element"></div>
-                <div class="float-element"></div>
-                <div class="float-element"></div>
+            <div class="matrix-rain">
+                <div class="matrix-column"></div>
+                <div class="matrix-column"></div>
+                <div class="matrix-column"></div>
+                <div class="matrix-column"></div>
+                <div class="matrix-column"></div>
+                <div class="matrix-column"></div>
+                <div class="matrix-column"></div>
+                <div class="matrix-column"></div>
+            </div>
+            <div class="geometric-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+            </div>
+        </div>
+    </div>
+                <div class="connection con-1"></div>
+                <div class="connection con-2"></div>
+                <div class="connection con-3"></div>
+                <div class="connection con-4"></div>
+            </div>
+            <div class="data-streams">
+                <div class="stream stream-1"></div>
+                <div class="stream stream-2"></div>
+                <div class="stream stream-3"></div>
+            </div>
+        </div>
+    </div>
                 <div class="float-element"></div>
             </div>
         </div>
@@ -115,6 +201,7 @@
                 <li><a href="#upload" class="nav-link">Upload</a></li>
                 <li><a href="#results" class="nav-link">Results</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
+                <li><button class="nav-link refresh-btn" data-action="refresh" title="Refresh Page">🔄</button></li>
             </ul>
             
             <!-- Theme Toggle -->
@@ -140,21 +227,82 @@
     <!-- Main Content -->
     <main class="main">
         <!-- Hero Section -->
-        <section id="home" class="hero">
+        <section id="home" class="hero section">
             <div class="container">
-                <h1>🛡️ FraudShield</h1>
-                <p>Advanced AI-powered fraud detection system that analyzes financial transactions in real-time using cutting-edge machine learning algorithms.</p>
-                
-                <!-- Privacy Notice -->
-                <div class="privacy-notice">
-                    <div class="privacy-icon">🔒</div>
-                    <div class="privacy-content">
-                        <h3>Privacy & Security</h3>
-                        <p>Your uploaded files are processed locally on this server for analysis and are <strong>never stored permanently</strong>. Results are available for download only during your session. All data is automatically cleared after processing.</p>
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="badge-icon">🛡️</span>
+                        <span class="badge-text">AI-Powered Security</span>
+                    </div>
+                    
+                    <h1 class="hero-title">
+                        <span class="hero-title-main">FraudShield</span>
+                        <span class="hero-title-sub">Advanced Fraud Detection System</span>
+                    </h1>
+                    
+                    <p class="hero-description">
+                        Transform your financial security with cutting-edge AI technology. 
+                        Our advanced machine learning algorithms analyze transaction patterns 
+                        in real-time to detect and prevent fraudulent activities with 
+                        industry-leading accuracy.
+                    </p>
+                    
+                    <!-- Key Features -->
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <span>Real-time Analysis</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🧠</div>
+                            <span>AI-Powered Detection</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🔒</div>
+                            <span>Bank-Grade Security</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">📊</div>
+                            <span>Advanced Analytics</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Privacy Notice -->
+                    <div class="privacy-notice">
+                        <div class="privacy-icon">🔒</div>
+                        <div class="privacy-content">
+                            <h3>Privacy & Security Guarantee</h3>
+                            <p>Your data is processed locally and <strong>never stored permanently</strong>. 
+                            All analysis is performed in real-time with automatic data clearance after processing. 
+                            Zero data retention policy ensures maximum privacy protection.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        <a href="#upload" class="btn btn-primary btn-lg hero-cta">
+                            <span>Start Analysis</span>
+                            <span class="btn-arrow">→</span>
+                        </a>
+                        <button class="btn btn-outline btn-lg" onclick="document.getElementById('pysparkToggle').click()">
+                            <span>Enable PySpark</span>
+                            <span class="feature-badge">Advanced</span>
+                        </button>
                     </div>
                 </div>
                 
-                <a href="#upload" class="btn btn-primary btn-lg">Start Analysis</a>
+                <!-- PySpark Toggle -->
+                <div class="pyspark-toggle-container">
+                    <label class="toggle-switch" for="pysparkToggle">
+                        <input type="checkbox" id="pysparkToggle">
+                        <span class="toggle-slider">
+                            <span class="toggle-label-off">Basic Mode</span>
+                            <span class="toggle-label-on">PySpark Mode</span>
+                        </span>
+                    </label>
+                    <p class="toggle-description">
+                        Enable PySpark for large dataset processing and advanced ML algorithms
+                    </p>
+                </div>
             </div>
         </section>
 
