@@ -91,6 +91,124 @@ FraudShield/
 
 ---
 
+## 📋 Module Overview
+
+### 🎯 Core Application Modules
+
+#### `app.py` - Flask Web Application
+- **Purpose**: Main application entry point and web server
+- **Functionality**: 
+  - Route handling for file uploads and fraud detection
+  - Session management and error handling
+  - Integration with machine learning pipeline
+  - RESTful API endpoints for frontend communication
+
+#### `src/data_ingestion.py` - Data Loading & Validation
+- **Purpose**: Handle data import and validation processes
+- **Functionality**:
+  - Multi-format file parsing (CSV, Excel, JSON)
+  - Data type validation and schema verification
+  - Missing value detection and handling
+  - Data quality assessment and reporting
+
+#### `src/data_preprocessing.py` - Feature Engineering
+- **Purpose**: Transform raw data into ML-ready features
+- **Functionality**:
+  - Feature scaling and normalization
+  - Categorical variable encoding
+  - Outlier detection and treatment
+  - Feature selection and dimensionality reduction
+  - Time-based feature extraction
+
+#### `src/ml_models.py` - Machine Learning Models
+- **Purpose**: Core fraud detection algorithms and model management
+- **Functionality**:
+  - Multiple ML algorithms (Random Forest, Logistic Regression, Isolation Forest)
+  - Model training and validation
+  - Ensemble methods for improved accuracy
+  - Anomaly detection using unsupervised learning
+  - Model performance evaluation and metrics
+
+### 🎨 Frontend Modules
+
+#### `templates/index.html` - Main Web Interface
+- **Purpose**: Primary user interface for the fraud detection system
+- **Functionality**:
+  - Responsive design with dark/light theme support
+  - Drag-and-drop file upload interface
+  - Real-time progress indicators and status updates
+  - Interactive charts and data visualizations
+  - Results dashboard with fraud analytics
+
+#### `static/css/style.css` - Modern Styling
+- **Purpose**: Advanced styling with glassmorphism design and theme support
+- **Functionality**:
+  - CSS custom properties for dynamic theming
+  - Smooth animations and transitions
+  - Responsive grid layouts and mobile optimization
+  - Interactive UI components and hover effects
+  - Loading animations and progress indicators
+
+#### `static/js/app.js` - Interactive Functionality
+- **Purpose**: Client-side JavaScript for enhanced user experience
+- **Functionality**:
+  - Theme toggle and persistence
+  - File upload handling with progress tracking
+  - Chart.js integration for data visualization
+  - Real-time status updates and notifications
+  - Smooth scrolling and navigation
+
+### 📊 Data Management Modules
+
+#### `data/` - Sample Datasets
+- **Purpose**: Provide test data for fraud detection validation
+- **Contents**:
+  - `bank_transactions_data.csv` - Primary training dataset
+  - `sample_transactions.csv` - Sample data for testing
+  - `test_bank.csv` - Validation dataset
+
+#### `uploads/` - User File Storage
+- **Purpose**: Temporary storage for user-uploaded files
+- **Functionality**:
+  - Secure file handling and validation
+  - Automatic cleanup after processing
+  - Support for multiple file formats
+
+#### `results/` - Generated Reports
+- **Purpose**: Store fraud detection results and analytics
+- **Functionality**:
+  - Timestamped result files
+  - CSV export with detailed fraud scores
+  - Summary statistics and model performance metrics
+
+### 📚 Documentation & Configuration
+
+#### `docs/` - Technical Documentation
+- **Purpose**: Comprehensive project documentation and GitHub Pages
+- **Contents**:
+  - Project setup and installation guides
+  - API documentation and usage examples
+  - Performance reports and completion summaries
+  - Static site files for GitHub Pages deployment
+
+#### `requirements.txt` - Dependency Management
+- **Purpose**: Define Python package dependencies
+- **Contents**:
+  - Core frameworks (Flask, PySpark, Scikit-learn)
+  - Data processing libraries (Pandas, NumPy)
+  - Visualization tools (Matplotlib, Seaborn)
+  - Web development utilities
+
+#### `tests/` - Quality Assurance
+- **Purpose**: Automated testing for system reliability
+- **Functionality**:
+  - Unit tests for individual modules
+  - Integration tests for end-to-end workflows
+  - Performance benchmarking
+  - Data validation testing
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
