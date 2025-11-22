@@ -167,12 +167,34 @@ pip install -r requirements.txt
 ```
 
 ### 4️⃣ Run the Application
+
+#### Option A: Using Startup Script (Recommended - Windows)
+```powershell
+# Automatically configures Java, PySpark, and starts the application
+.\start.ps1
+```
+
+#### Option B: Direct Python Execution
 ```bash
+# Make sure JAVA_HOME is set
 python app.py
 ```
 
 ### 5️⃣ Access the Application
-Open your browser and navigate to: **http://localhost:5000**
+
+**Main Web Interface**: http://localhost:5000
+
+**Apache Spark Web UI**: 
+- Startup session: http://localhost:4040
+- Processing session: http://localhost:4041 (or URL shown during processing)
+
+The Spark Web UI shows:
+- ✅ All running and completed Spark jobs
+- 📊 Detailed execution stages and tasks
+- ⚡ Performance metrics and resource usage
+- 🔍 Job timeline and DAG visualization
+
+> 💡 **Tip**: When processing a file, a **Spark Web UI button** will appear in the frontend. Click it to view real-time job execution details!
 
 ---
 
@@ -184,10 +206,28 @@ Open your browser and navigate to: **http://localhost:5000**
 3. **Format Support**: CSV, Excel (.xlsx, .xls), and JSON formats supported
 
 ### 🔍 Fraud Detection
-1. **Automatic Processing**: Files are processed immediately upon upload
-2. **Real-time Analysis**: Watch live progress with animated indicators
-3. **Model Selection**: Choose from multiple ML algorithms
-4. **Results Display**: Interactive charts and detailed fraud reports
+
+#### Processing Interface Features:
+1. **Real-time Progress**: Watch live updates of each processing step
+2. **Processing Logs**: See detailed console output directly in the browser
+3. **Spark Web UI Button**: One-click access to Apache Spark job monitoring
+4. **Stage Indicators**: Visual progress through data ingestion, preprocessing, ML training, and results
+
+#### Processing Steps Displayed:
+- ⚙️  Initializing Spark session
+- 📥 Loading data into Spark
+- 🔍 Running data validation
+- 📊 Generating data profile
+- 🚨 Detecting anomalies
+- 🔧 Data preprocessing (5 steps)
+- 🤖 Training ML models
+- 📊 Evaluating performance
+- ✅ Generating results
+
+#### Spark Web UI Access:
+- Click the **"🔥 Open Spark Web UI"** button that appears during processing
+- View 20+ Spark jobs with complete execution details
+- Monitor stages, tasks, and performance metrics in real-time
 
 ### 📊 Analytics Dashboard
 - **Fraud Overview**: High-level statistics and trends

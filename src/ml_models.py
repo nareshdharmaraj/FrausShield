@@ -209,65 +209,39 @@ class FraudDetectionMLPipeline:
             Dictionary with trained models and performance metrics
         """
         try:
+            print("\n" + "=" * 80)
+            print("🤖 TRAINING SUPERVISED ML MODELS")
+            print("=" * 80)
             logger.info("🤖 Training supervised ML models...")
             
+            # Train only 2 lightweight models with NO cross-validation for speed
             models_config = {
                 "logistic_regression": {
                     "model": LogisticRegression(
                         featuresCol="features",
                         labelCol=target_column,
-                        maxIter=100,
-                        regParam=0.01
+                        maxIter=20,  # Reduced for speed
+                        regParam=0.01,
+                        standardization=True
                     ),
-                    "param_grid": ParamGridBuilder() \
-                        .addGrid(LogisticRegression.regParam, [0.01, 0.1, 0.5]) \
-                        .addGrid(LogisticRegression.elasticNetParam, [0.0, 0.5, 1.0]) \
-                        .build()
+                    "use_cv": False  # No CV for speed
                 },
                 
                 "random_forest": {
                     "model": RandomForestClassifier(
                         featuresCol="features",
                         labelCol=target_column,
-                        numTrees=50,
-                        maxDepth=10,
+                        numTrees=10,  # Minimal trees
+                        maxDepth=5,   # Shallow
                         seed=42
                     ),
-                    "param_grid": ParamGridBuilder() \
-                        .addGrid(RandomForestClassifier.numTrees, [20, 50, 100]) \
-                        .addGrid(RandomForestClassifier.maxDepth, [5, 10, 15]) \
-                        .build()
-                },
-                
-                "gradient_boosting": {
-                    "model": GBTClassifier(
-                        featuresCol="features",
-                        labelCol=target_column,
-                        maxIter=50,
-                        maxDepth=6,
-                        seed=42
-                    ),
-                    "param_grid": ParamGridBuilder() \
-                        .addGrid(GBTClassifier.maxIter, [20, 50, 100]) \
-                        .addGrid(GBTClassifier.maxDepth, [4, 6, 8]) \
-                        .build()
-                },
-                
-                "decision_tree": {
-                    "model": DecisionTreeClassifier(
-                        featuresCol="features",
-                        labelCol=target_column,
-                        maxDepth=10,
-                        seed=42
-                    ),
-                    "param_grid": ParamGridBuilder() \
-                        .addGrid(DecisionTreeClassifier.maxDepth, [5, 10, 15, 20]) \
-                        .build()
+                    "use_cv": False  # No CV for speed
                 }
             }
             
             # Train each model
             for model_name, config in models_config.items():
+                print(f"\n⏳ Training {model_name.replace('_', ' ').title()}...")
                 logger.info(f"📈 Training {model_name}...")
                 
                 try:
@@ -278,32 +252,40 @@ class FraudDetectionMLPipeline:
                         metricName="areaUnderROC"
                     )
                     
-                    # Cross-validation for hyperparameter tuning
-                    cv = CrossValidator(
-                        estimator=config["model"],
-                        estimatorParamMaps=config["param_grid"],
-                        evaluator=evaluator,
-                        numFolds=3,
-                        seed=42
-                    )
-                    
-                    # Fit model
-                    cv_model = cv.fit(train_df)
-                    best_model = cv_model.bestModel
+                    # Direct training without cross-validation for speed
+                    if config.get("use_cv", False):
+                        # Cross-validation (slower)
+                        cv = CrossValidator(
+                            estimator=config["model"],
+                            estimatorParamMaps=config["param_grid"],
+                            evaluator=evaluator,
+                            numFolds=2,
+                            seed=42
+                        )
+                        print(f"   ⚙️  Performing 2-fold cross-validation...")
+                        cv_model = cv.fit(train_df)
+                        best_model = cv_model.bestModel
+                    else:
+                        # Direct training (faster)
+                        print(f"   ⚙️  Training with fixed parameters (no CV)...")
+                        best_model = config["model"].fit(train_df)
                     
                     # Store model
                     self.models[model_name] = {
                         "model": best_model,
-                        "cv_model": cv_model,
                         "evaluator": evaluator
                     }
                     
+                    print(f"   ✅ {model_name.replace('_', ' ').title()} trained successfully")
                     logger.info(f"✅ {model_name} trained successfully")
                     
                 except Exception as e:
+                    print(f"   ❌ Error training {model_name.replace('_', ' ').title()}: {str(e)}")
                     logger.error(f"❌ Error training {model_name}: {str(e)}")
                     continue
             
+            print(f"\n✅ Successfully trained {len(self.models)} supervised models")
+            print("=" * 80 + "\n")
             logger.info(f"🎯 Trained {len(self.models)} supervised models")
             return self.models
             
@@ -322,12 +304,16 @@ class FraudDetectionMLPipeline:
             Dictionary with trained unsupervised models
         """
         try:
+            print("\n" + "=" * 80)
+            print("🔍 TRAINING UNSUPERVISED ANOMALY DETECTION MODELS")
+            print("=" * 80)
             logger.info("🔍 Training unsupervised anomaly detection models...")
             
             unsupervised_models = {}
             
             # KMeans clustering for anomaly detection
             try:
+                print("\n⏳ Training KMeans clustering for anomaly detection...")
                 logger.info("📊 Training KMeans clustering...")
                 
                 # Determine optimal k using elbow method (simplified)
@@ -353,14 +339,17 @@ class FraudDetectionMLPipeline:
                         }
                         break
                 
+                print(f"   ✅ KMeans clustering trained with k={best_k}")
                 logger.info(f"✅ KMeans clustering trained with k={best_k}")
                 
             except Exception as e:
+                print(f"   ❌ Error training KMeans: {str(e)}")
                 logger.error(f"❌ Error training KMeans: {str(e)}")
             
             # Isolation Forest using scikit-learn (if available)
             if SKLEARN_AVAILABLE:
                 try:
+                    print("\n⏳ Training Isolation Forest for anomaly detection...")
                     logger.info("🌲 Training Isolation Forest...")
                     
                     # Convert to pandas for sklearn
@@ -390,12 +379,16 @@ class FraudDetectionMLPipeline:
                             "contamination": 0.1
                         }
                         
+                        print(f"   ✅ Isolation Forest trained successfully")
                         logger.info("✅ Isolation Forest trained successfully")
                 
                 except Exception as e:
+                    print(f"   ❌ Error training Isolation Forest: {str(e)}")
                     logger.error(f"❌ Error training Isolation Forest: {str(e)}")
             
             self.unsupervised_models = unsupervised_models
+            print(f"\n✅ Successfully trained {len(unsupervised_models)} unsupervised models")
+            print("=" * 80 + "\n")
             logger.info(f"🎯 Trained {len(unsupervised_models)} unsupervised models")
             
             return unsupervised_models
@@ -417,6 +410,9 @@ class FraudDetectionMLPipeline:
             Dictionary with performance metrics for each model
         """
         try:
+            print("\n" + "=" * 80)
+            print("📊 EVALUATING MODEL PERFORMANCE")
+            print("=" * 80)
             logger.info("📊 Evaluating model performance...")
             
             performance_results = {}
@@ -424,6 +420,7 @@ class FraudDetectionMLPipeline:
             # Evaluate supervised models
             for model_name, model_info in self.models.items():
                 try:
+                    print(f"\n⏳ Evaluating {model_name.replace('_', ' ').title()}...")
                     logger.info(f"🔍 Evaluating {model_name}...")
                     
                     model = model_info["model"]
@@ -467,6 +464,7 @@ class FraudDetectionMLPipeline:
                         "f1_score": round(f1_score, 4)
                     }
                     
+                    print(f"   ✅ {model_name.replace('_', ' ').title()} - AUC: {auc_roc:.4f}, Accuracy: {accuracy:.4f}, F1: {f1_score:.4f}")
                     logger.info(f"✅ {model_name} - AUC: {auc_roc:.4f}, Accuracy: {accuracy:.4f}")
                     
                 except Exception as e:
@@ -480,6 +478,8 @@ class FraudDetectionMLPipeline:
                 self.best_model_name = best_model_name
                 self.best_model = self.models[best_model_name]["model"]
                 
+                print(f"\n🏆 Best Model: {best_model_name.replace('_', ' ').title()} (AUC: {performance_results[best_model_name]['auc_roc']:.4f})")
+                print("=" * 80 + "\n")
                 logger.info(f"🏆 Best model: {best_model_name} (AUC: {performance_results[best_model_name]['auc_roc']:.4f})")
             
             self.model_performance = performance_results
@@ -544,6 +544,7 @@ class FraudDetectionMLPipeline:
             else:
                 raise ValueError("No trained model available for prediction")
             
+            print(f"\n⏳ Making predictions using {used_model.replace('_', ' ').title()}...")
             logger.info(f"🔮 Making predictions using {used_model}...")
             
             # Make predictions
@@ -557,6 +558,7 @@ class FraudDetectionMLPipeline:
                     col("probability").getItem(1).cast(DoubleType())
                 )
             
+            print("   ✅ Predictions completed")
             logger.info("✅ Predictions completed")
             return predictions
             

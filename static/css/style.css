@@ -2794,13 +2794,153 @@ body::after {
     color: var(--text-color);
 }
 
+/* Spark Web UI Container */
+.spark-ui-container {
+    margin: 1.5rem 0;
+    animation: slideDown 0.5s ease-out;
+}
+
+.spark-ui-banner {
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 50%, #FFA07A 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.spark-ui-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: sparkShine 3s infinite;
+}
+
+@keyframes sparkShine {
+    0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.spark-icon {
+    font-size: 2.5rem;
+    animation: sparkPulse 2s infinite;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+}
+
+@keyframes sparkPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.spark-info {
+    flex: 1;
+    color: white;
+}
+
+.spark-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.spark-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.95;
+    font-weight: 500;
+}
+
+.btn-spark {
+    background: white;
+    color: #FF6B35;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-spark:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    background: #FFF5F0;
+}
+
+.spark-btn-icon {
+    font-size: 1.2rem;
+    animation: sparkFlame 1s infinite;
+}
+
+@keyframes sparkFlame {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.spark-btn-arrow {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-spark:hover .spark-btn-arrow {
+    transform: translateX(4px);
+}
+
 .processing-log {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 12px;
     padding: 1rem;
     margin-bottom: 2rem;
-    max-height: 120px;
+    max-height: 200px;
     overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.processing-log::-webkit-scrollbar {
+    width: 8px;
+}
+
+.processing-log::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.processing-log::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 4px;
+}
+
+.processing-log::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.7);
 }
 
 .log-header {

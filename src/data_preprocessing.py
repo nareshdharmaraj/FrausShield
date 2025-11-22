@@ -89,19 +89,27 @@ class DataPreprocessingPipeline:
             null_threshold: Threshold for dropping columns with too many nulls
         """
         try:
+            print(f"\n{'='*80}")
+            print(f"🧹 DATA CLEANING STAGE")
+            print(f"{'='*80}")
+            
             logger.info("🧹 Starting data cleaning...")
             
             if self.df is None:
                 raise ValueError("DataFrame not set. Use set_dataframe() first.")
             
             df = self.df
+            print("⏳ Counting initial rows (Spark Action)...")
             initial_count = df.count()
+            print(f"Initial Row Count: {initial_count:,}")
             
             # Remove duplicates
             if remove_duplicates:
+                print("\n⏳ Removing duplicates (Spark Action)...")
                 df = df.dropDuplicates()
                 after_dedup_count = df.count()
                 duplicates_removed = initial_count - after_dedup_count
+                print(f"✅ Duplicates Removed: {duplicates_removed:,}")
                 logger.info(f"🔄 Removed {duplicates_removed} duplicate rows")
             
             # Handle columns with excessive nulls
@@ -200,6 +208,7 @@ class DataPreprocessingPipeline:
             create_user_features: Create user behavior features
         """
         try:
+            print("\n⏳ Engineering features from raw data...")
             logger.info("⚙️ Engineering features...")
             
             df = self.processed_df if self.processed_df is not None else self.df
@@ -225,6 +234,7 @@ class DataPreprocessingPipeline:
                 df = self._create_merchant_features(df)
             
             self.processed_df = df
+            print("   ✅ Feature engineering completed")
             logger.info("✅ Feature engineering completed")
             return self
             
@@ -359,6 +369,7 @@ class DataPreprocessingPipeline:
             max_categories: Maximum number of categories for one-hot encoding
         """
         try:
+            print(f"\n⏳ Encoding categorical variables using {encoding_method} method...")
             logger.info(f"🏷️ Encoding categorical variables using {encoding_method} method...")
             
             df = self.processed_df if self.processed_df is not None else self.df
@@ -369,6 +380,7 @@ class DataPreprocessingPipeline:
                 df = self._apply_label_encoding(df)
             
             self.processed_df = df
+            print(f"   ✅ Categorical encoding completed")
             logger.info("✅ Categorical encoding completed")
             return self
             
@@ -449,6 +461,7 @@ class DataPreprocessingPipeline:
             columns: Specific columns to scale (if None, scale all numerical)
         """
         try:
+            print(f"\n⏳ Scaling numerical features using {scaling_method} method...")
             logger.info(f"📏 Scaling numerical features using {scaling_method} method...")
             
             df = self.processed_df if self.processed_df is not None else self.df
@@ -494,6 +507,7 @@ class DataPreprocessingPipeline:
                 # Update feature columns
                 self.feature_columns.extend(scaled_columns)
                 
+                print(f"   ✅ Scaled {len(scaled_columns)} numerical columns")
                 logger.info(f"✅ Scaled {len(scaled_columns)} numerical columns")
             
             self.processed_df = df
@@ -511,6 +525,7 @@ class DataPreprocessingPipeline:
             feature_cols: Specific columns to include (if None, use all engineered features)
         """
         try:
+            print("\n⏳ Creating feature vector for ML models...")
             logger.info("🔗 Creating feature vector...")
             
             df = self.processed_df if self.processed_df is not None else self.df
@@ -554,6 +569,7 @@ class DataPreprocessingPipeline:
             self.processed_df = df
             self.feature_columns = features
             
+            print(f"   ✅ Created feature vector with {len(features)} features")
             logger.info(f"✅ Created feature vector with {len(features)} features")
             logger.info(f"Feature columns: {features}")
             

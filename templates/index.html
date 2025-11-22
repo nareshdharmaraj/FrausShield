@@ -201,6 +201,7 @@
                 <li><a href="#upload" class="nav-link">Upload</a></li>
                 <li><a href="#results" class="nav-link">Results</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="http://localhost:4040" target="_blank" class="nav-link" title="Open Spark Web UI">⚡ Spark UI</a></li>
                 <li><button class="nav-link refresh-btn" data-action="refresh" title="Refresh Page">🔄</button></li>
             </ul>
             
@@ -406,6 +407,23 @@
                             <span class="detail-label">Current Task:</span>
                             <span class="detail-value" id="currentTask">Initializing fraud detection engine...</span>
                         </div>
+                        
+                        <!-- Spark Web UI Button -->
+                        <div id="sparkUIContainer" class="spark-ui-container" style="display: none;">
+                            <div class="spark-ui-banner">
+                                <div class="spark-icon">⚡</div>
+                                <div class="spark-info">
+                                    <div class="spark-title">Apache Spark Jobs Running</div>
+                                    <div class="spark-subtitle">View real-time execution details</div>
+                                </div>
+                                <a id="sparkUIButton" href="#" target="_blank" class="btn btn-spark">
+                                    <span class="spark-btn-icon">🔥</span>
+                                    <span>Open Spark Web UI</span>
+                                    <span class="spark-btn-arrow">→</span>
+                                </a>
+                            </div>
+                        </div>
+                        
                         <div class="processing-log" id="processingLog">
                             <div class="log-item">• System initialized</div>
                         </div>

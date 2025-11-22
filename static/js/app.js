@@ -806,6 +806,73 @@ async function prepareUserInput() {
     }
 }
 
+// Status Polling Functions
+let statusInterval = null;
+let sparkUIShown = false;
+
+function startStatusPolling() {
+    sparkUIShown = false;
+    statusInterval = setInterval(async () => {
+        try {
+            const response = await fetch('/processing_status');
+            const data = await response.json();
+            
+            // Update logs
+            if (data.logs && data.logs.length > 0) {
+                updateProcessingLog(data.logs);
+            }
+            
+            // Show Spark UI button if URL is available and not already shown
+            if (data.spark_ui_url && !sparkUIShown) {
+                showSparkUIButton(data.spark_ui_url);
+                sparkUIShown = true;
+            }
+        } catch (error) {
+            console.error('Status polling error:', error);
+        }
+    }, 1000); // Poll every second
+    
+    return statusInterval;
+}
+
+function stopStatusPolling(interval) {
+    if (interval) {
+        clearInterval(interval);
+        statusInterval = null;
+    }
+}
+
+function updateProcessingLog(logs) {
+    const logContainer = document.getElementById('processingLog');
+    if (!logContainer) return;
+    
+    // Clear existing logs
+    logContainer.innerHTML = '';
+    
+    // Add new logs (show last 10)
+    const recentLogs = logs.slice(-10);
+    recentLogs.forEach(log => {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.textContent = `• ${log.message}`;
+        logContainer.appendChild(logItem);
+    });
+    
+    // Auto-scroll to bottom
+    logContainer.scrollTop = logContainer.scrollHeight;
+}
+
+function showSparkUIButton(url) {
+    const container = document.getElementById('sparkUIContainer');
+    const button = document.getElementById('sparkUIButton');
+    
+    if (container && button) {
+        button.href = url + '/jobs/';
+        container.style.display = 'block';
+        console.log('✨ Spark UI button displayed:', url);
+    }
+}
+
 async function processFileWithUserInput() {
     if (!uploadedFile) {
         showAlert('Please select a file first.', 'error');
@@ -838,17 +905,24 @@ async function processFileWithUserInput() {
             console.log('🎯 User configuration sent:', userConfig);
         }
         
-        // Upload and process file with timeout
+        // Upload and process file with extended timeout for ML training
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+        const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minute timeout for ML training
         
         console.log('🚀 Starting file processing with user input...');
+        console.log('⏱️  Timeout set to 10 minutes for ML model training');
+        
+        // Start polling for processing status
+        const statusPoller = startStatusPolling();
         
         const response = await fetch('/process', {
             method: 'POST',
             body: formData,
             signal: controller.signal
         });
+        
+        // Stop polling when processing completes
+        stopStatusPolling(statusPoller);
         
         clearTimeout(timeoutId);
         

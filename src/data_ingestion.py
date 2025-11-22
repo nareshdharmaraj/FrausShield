@@ -62,12 +62,46 @@ class DataIngestionEngine:
                              .config("spark.sql.adaptive.skewJoin.enabled", "true")
                              .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
                              .config("spark.sql.execution.arrow.pyspark.enabled", "true")
+                             .config("spark.ui.enabled", "true")
+                             .config("spark.ui.retainedJobs", "100")
+                             .config("spark.ui.retainedStages", "100")
+                             .config("spark.ui.retainedTasks", "1000")
+                             .config("spark.sql.adaptive.localShuffleReader.enabled", "true")
+                             .config("spark.dynamicAllocation.enabled", "false")
+                             .config("spark.executor.instances", "2")
+                             .config("spark.executor.cores", "2")
+                             .config("spark.executor.memory", "1g")
+                             .config("spark.driver.memory", "1g")
+                             .config("spark.sql.shuffle.partitions", "10")
                              .getOrCreate())
                 
-                # Set log level to reduce noise
-                self.spark.sparkContext.setLogLevel("WARN")
+                # Set log level to INFO to show tasks and jobs
+                self.spark.sparkContext.setLogLevel("INFO")
+                
+                # Get actual Spark UI URL and normalize to localhost
+                raw_ui_url = self.spark.sparkContext.uiWebUrl or "http://localhost:4040"
+                # Replace kubernetes.docker.internal with localhost for easier access
+                spark_ui_url = raw_ui_url.replace("kubernetes.docker.internal", "localhost")
+                
+                # Print Spark configuration for debugging
+                print("\n" + "="*80)
+                print("🚀 SPARK SESSION INITIALIZED")
+                print("="*80)
+                print(f"Application Name: {self.app_name}")
+                print(f"Spark Version: {self.spark.version}")
+                print(f"Application ID: {self.spark.sparkContext.applicationId}")
+                print(f"Spark UI: {spark_ui_url}")
+                print(f"Master: {self.spark.sparkContext.master}")
+                print(f"Executor Memory: 1g")
+                print(f"Driver Memory: 1g")
+                print("="*80 + "\n")
+                
+                # Store UI URL for later access
+                self.spark_ui_url = spark_ui_url
                 
                 logger.info(f"✅ Spark session initialized: {self.spark.version}")
+                logger.info(f"🌐 Spark UI available at: {spark_ui_url}")
+                logger.info(f"📊 Application ID: {self.spark.sparkContext.applicationId}")
             
             return self.spark
             
@@ -90,6 +124,13 @@ class DataIngestionEngine:
             if self.spark is None:
                 self.initialize_spark()
             
+            print(f"\n{'='*80}")
+            print(f"📂 LOADING CSV DATA")
+            print(f"{'='*80}")
+            print(f"File: {file_path}")
+            print(f"Infer Schema: {infer_schema}")
+            print(f"{'='*80}\n")
+            
             logger.info(f"📁 Loading data from: {file_path}")
             
             # Load data with advanced options
@@ -104,11 +145,24 @@ class DataIngestionEngine:
             if not infer_schema and self.schema:
                 df_reader = df_reader.schema(self.schema)
             
+            print("⏳ Reading CSV file and inferring schema...")
             self.df = df_reader.csv(file_path)
             
-            # Basic info
+            # Cache the DataFrame for better performance and visibility in Spark UI
+            print("⏳ Caching DataFrame in memory...")
+            self.df = self.df.cache()
+            
+            # Basic info - this will trigger Spark actions
+            print("⏳ Counting rows (Spark Action)...")
             row_count = self.df.count()
             col_count = len(self.df.columns)
+            
+            print(f"\n{'='*80}")
+            print(f"✅ DATA LOADED SUCCESSFULLY")
+            print(f"{'='*80}")
+            print(f"Rows: {row_count:,}")
+            print(f"Columns: {col_count}")
+            print(f"{'='*80}\n")
             
             logger.info(f"✅ Data loaded successfully: {row_count} rows, {col_count} columns")
             

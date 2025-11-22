@@ -28,19 +28,50 @@ matplotlib.use('Agg')  # Use non-interactive backend
 import io
 import base64
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging with detailed format
+logging.basicConfig(
+    level=logging.WARNING,  # Suppress INFO logs from Flask and Werkzeug
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 logger = logging.getLogger(__name__)
+
+# Configure Spark logging to suppress verbose output
+spark_logger = logging.getLogger('pyspark')
+spark_logger.setLevel(logging.ERROR)
+
+# Suppress Flask/Werkzeug startup messages
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
 # Import our advanced modules
 try:
+    import sys
+    import os
+    
+    # Ensure JAVA_HOME is set for PySpark
+    if 'JAVA_HOME' not in os.environ:
+        # Try to find Java automatically
+        import subprocess
+        try:
+            java_path = subprocess.check_output(['where', 'java'], stderr=subprocess.DEVNULL, text=True).strip().split('\n')[0]
+            java_home = os.path.dirname(os.path.dirname(java_path))
+            os.environ['JAVA_HOME'] = java_home
+            print(f"✅ Auto-detected JAVA_HOME: {java_home}")
+        except:
+            print("⚠️  Warning: JAVA_HOME not set. PySpark requires Java 8+")
+    
     from src.data_ingestion import DataIngestionEngine, quick_ingest
     from src.data_preprocessing import DataPreprocessingPipeline, preprocess_fraud_data
     from src.ml_models import FraudDetectionMLPipeline, train_fraud_detection_models
     ADVANCED_PROCESSING = True
-    logger.info("✅ Advanced PySpark modules loaded successfully")
+    print("✅ PySpark modules loaded successfully")
 except ImportError as e:
-    logger.warning(f"⚠️ Advanced modules not available, using basic processing: {e}")
+    print(f"⚠️  Warning: Advanced modules not available, using basic processing")
+    print(f"   Error details: {str(e)}")
+    print(f"   Install required packages: pip install pyspark scikit-learn")
+    ADVANCED_PROCESSING = False
+except Exception as e:
+    print(f"⚠️  Warning: Error loading PySpark: {str(e)}")
     ADVANCED_PROCESSING = False
 
 
@@ -195,6 +226,9 @@ os.makedirs(app.config['RESULTS_FOLDER'], exist_ok=True)
 current_results = None
 current_filename = None
 download_progress = {}  # Track download progress by session ID
+processing_logs = []  # Store processing logs for frontend
+spark_ui_url = None  # Store Spark Web UI URL
+processing_lock = threading.Lock()  # Thread-safe log access
 
 @app.route('/')
 def index():
@@ -294,11 +328,37 @@ def extract_data():
         logger.error(traceback.format_exc())
         return jsonify({'error': f'Error extracting data: {str(e)}'}), 500
 
+def add_processing_log(message):
+    """Add a log message to the processing logs"""
+    global processing_logs
+    with processing_lock:
+        processing_logs.append({
+            'timestamp': datetime.now().isoformat(),
+            'message': message
+        })
+        # Keep only last 100 logs
+        if len(processing_logs) > 100:
+            processing_logs = processing_logs[-100:]
+
+@app.route('/processing_status')
+def get_processing_status():
+    """Get current processing status including logs and Spark UI URL"""
+    global processing_logs, spark_ui_url
+    with processing_lock:
+        return jsonify({
+            'logs': processing_logs[-50:],  # Return last 50 logs
+            'spark_ui_url': spark_ui_url
+        })
 
 @app.route('/process', methods=['POST'])
 def process_file():
     """Process uploaded CSV file and perform fraud detection"""
-    global current_results, current_filename
+    global current_results, current_filename, processing_logs, spark_ui_url
+    
+    # Reset logs and Spark UI URL at start of processing
+    with processing_lock:
+        processing_logs = []
+        spark_ui_url = None
     
     try:
         logger.info("📨 Received file processing request")
@@ -601,9 +661,68 @@ def health():
     })
 
 
+def print_analysis_report(stats, data_profile=None, anomalies=None, performance=None, results_file=None, spark_ui_url=None):
+    """Print comprehensive analysis report to terminal"""
+    print("\n" + "=" * 80)
+    print("📊 FRAUD DETECTION ANALYSIS REPORT")
+    print("=" * 80)
+    
+    # Transaction Summary
+    print("\n┌─ TRANSACTION SUMMARY " + "─" * 56)
+    print(f"│  Total Transactions:     {stats['total']:,}")
+    print(f"│  Fraudulent:             {stats['fraud']:,} ({stats['fraud_rate']:.2f}%)")
+    print(f"│  Normal:                 {stats['normal']:,} ({100-stats['fraud_rate']:.2f}%)")
+    print("└" + "─" * 79)
+    
+    # Data Quality (if available)
+    if data_profile and 'data_quality' in data_profile:
+        quality = data_profile['data_quality']
+        print("\n┌─ DATA QUALITY METRICS " + "─" * 54)
+        print(f"│  Overall Score:          {quality.get('score', 'N/A')}/100")
+        print(f"│  Completeness:           {quality.get('completeness', 'N/A')}%")
+        print(f"│  Validity:               {quality.get('validity', 'N/A')}%")
+        print(f"│  Consistency:            {quality.get('consistency', 'N/A')}%")
+        print("└" + "─" * 79)
+    
+    # Anomalies (if available)
+    if anomalies:
+        print("\n┌─ ANOMALY DETECTION " + "─" * 58)
+        print(f"│  Amount Anomalies:       {len(anomalies.get('amount', []))}")
+        print(f"│  Velocity Anomalies:     {len(anomalies.get('velocity', []))}")
+        print(f"│  Pattern Anomalies:      {len(anomalies.get('pattern', []))}")
+        print("└" + "─" * 79)
+    
+    # Model Performance (if available)
+    if performance:
+        print("\n┌─ MODEL PERFORMANCE " + "─" * 58)
+        for model_name, metrics in performance.items():
+            print(f"│  {model_name.replace('_', ' ').title():28s}")
+            if isinstance(metrics, dict):
+                for metric, value in metrics.items():
+                    if isinstance(value, (int, float)):
+                        print(f"│    ├─ {metric.upper():20s} {value:.4f}")
+            print("│")
+        print("└" + "─" * 79)
+    
+    # Results File
+    if results_file:
+        print("\n┌─ OUTPUT FILES " + "─" * 63)
+        print(f"│  Results saved to:       {results_file}")
+        print("└" + "─" * 79)
+    
+    print("\n✅ Analysis completed successfully!")
+    print("🌐 View detailed visualizations at http://localhost:5000")
+    if spark_ui_url:
+        print(f"🔍 Spark Web UI available at {spark_ui_url}")
+        print("\n" + "⚡" * 40)
+        print("⚡ 👉 TO VIEW ALL SPARK JOBS, OPEN THIS URL: 👈 ⚡")
+        print(f"⚡    {spark_ui_url}/jobs/    ⚡")
+        print("⚡" * 40)
+    print("=" * 80 + "\n")
+
 def perform_fraud_detection(df, user_config=None):
     """
-    Perform fraud detection with fast processing for web interface
+    Perform fraud detection with configurable processing mode
     """
     try:
         data_size = len(df)
@@ -612,9 +731,27 @@ def perform_fraud_detection(df, user_config=None):
         if user_config:
             logger.info(f"🎯 Using user configuration: {user_config}")
         
-        # For web interface, always use fast basic processing to avoid timeouts
-        logger.info("⚡ Using optimized basic processing for web interface...")
-        return perform_basic_fraud_detection(df, user_config)
+        # FORCE PySpark processing - DO NOT use basic processing
+        if not ADVANCED_PROCESSING:
+            print("\n" + "=" * 80)
+            print("❌ ERROR: PySpark modules are NOT loaded!")
+            print("=" * 80)
+            print("Please ensure:")
+            print("  1. Java is installed: java -version")
+            print("  2. PySpark is installed: pip install pyspark")
+            print("  3. Use start.ps1 to run the application")
+            print("=" * 80 + "\n")
+            raise Exception("PySpark not available - cannot process data")
+        
+        # ALWAYS use PySpark processing
+        print("\n" + "=" * 80)
+        print("🚀 USING PYSPARK ML PIPELINE FOR FRAUD DETECTION")
+        print("=" * 80)
+        print(f"Processing {data_size:,} transactions with Spark")
+        print("=" * 80 + "\n")
+        
+        logger.info("🚀 Using PySpark ML pipeline for advanced processing...")
+        return perform_advanced_fraud_detection(df)
             
     except Exception as e:
         logger.error(f"Error in fraud detection: {str(e)}")
@@ -625,46 +762,99 @@ def perform_advanced_fraud_detection(df):
     """
     Advanced fraud detection using complete PySpark ML pipeline
     """
+    global spark_ui_url
+    
     try:
         logger.info("🚀 Starting complete ML fraud detection pipeline...")
+        add_processing_log("🚀 Starting ML fraud detection pipeline...")
         
         # Save DataFrame as temporary CSV for PySpark processing
         temp_csv_path = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_processing.csv')
         df.to_csv(temp_csv_path, index=False)
+        add_processing_log(f"💾 Saved {len(df):,} rows for processing")
         
         # Initialize data ingestion engine
+        add_processing_log("⚙️  Initializing Spark session...")
         ingestion_engine = DataIngestionEngine()
         spark = ingestion_engine.initialize_spark()
         
-        # Load data with PySpark
-        spark_df = ingestion_engine.load_csv_data(temp_csv_path)
+        # Store Spark UI URL globally
+        raw_url = spark.sparkContext.uiWebUrl or 'http://localhost:4040'
+        spark_ui_url = raw_url.replace("kubernetes.docker.internal", "localhost")
+        add_processing_log(f"✅ Spark initialized - UI: {spark_ui_url}")
         
-        # Validate schema
+        # Load data with PySpark - This triggers Spark Job #1
+        print("📥 Loading data into Spark...")
+        add_processing_log("📥 Loading data into Spark...")
+        spark_df = ingestion_engine.load_csv_data(temp_csv_path)
+        row_count = spark_df.count()
+        print(f"✅ Data loaded: {row_count:,} rows (Spark Job completed)")
+        add_processing_log(f"✅ Data loaded: {row_count:,} rows")
+        
+        # Trigger explicit actions to create Spark jobs
+        print("\n🔍 Running data validation (Spark Job)...")
+        add_processing_log("🔍 Running data validation...")
+        spark_df.cache()  # Cache for better performance and visibility
+        spark_df.persist()
+        
+        # Validate schema - Spark Job #2
         validation_results = ingestion_engine.validate_schema(spark_df)
         logger.info(f"Schema validation: {validation_results['is_valid']}")
+        print(f"✅ Schema validation completed")
+        add_processing_log("✅ Schema validation completed")
         
-        # Generate data profile
+        # Generate data profile - Spark Job #3
+        print("\n📊 Generating data profile (Spark Job)...")
+        add_processing_log("📊 Generating data profile...")
         data_profile = ingestion_engine.generate_data_profile(spark_df)
         logger.info(f"Data quality score: {data_profile['data_quality']['score']}/100")
+        print(f"✅ Data profiling completed - Quality Score: {data_profile['data_quality']['score']}/100")
+        add_processing_log(f"✅ Quality Score: {data_profile['data_quality']['score']}/100")
         
-        # Detect anomalies
+        # Detect anomalies - Spark Job #4
+        print("\n🚨 Detecting anomalies (Spark Job)...")
+        add_processing_log("🚨 Detecting anomalies...")
         anomalies = ingestion_engine.detect_anomalies(spark_df)
+        print(f"✅ Anomaly detection completed")
+        add_processing_log("✅ Anomaly detection completed")
         
         # Initialize preprocessing pipeline
+        print("\n🔧 Starting data preprocessing pipeline...")
+        add_processing_log("🔧 Starting data preprocessing...")
         preprocessing_pipeline = DataPreprocessingPipeline(spark)
         
         # Run complete preprocessing pipeline with error handling
         try:
+            print("   Step 1/5: Data cleaning...")
+            add_processing_log("Step 1/5: Data cleaning")
             processed_df = (preprocessing_pipeline
                            .set_dataframe(spark_df)
-                           .clean_data(remove_duplicates=True, handle_nulls="fill")
-                           .engineer_features(create_time_features=True,
+                           .clean_data(remove_duplicates=True, handle_nulls="fill"))
+            
+            print("   Step 2/5: Feature engineering...")
+            add_processing_log("Step 2/5: Feature engineering")
+            processed_df = processed_df.engineer_features(create_time_features=True,
                                             create_amount_features=True,
                                             create_user_features=True)
-                           .encode_categorical_variables(encoding_method="onehot", max_categories=10)
-                           .scale_numerical_features(scaling_method="standard")
-                           .create_feature_vector()
-                           .processed_df)
+            
+            print("   Step 3/5: Encoding categorical variables...")
+            add_processing_log("Step 3/5: Encoding categorical")
+            processed_df = processed_df.encode_categorical_variables(encoding_method="onehot", max_categories=10)
+            
+            print("   Step 4/5: Scaling numerical features...")
+            add_processing_log("Step 4/5: Scaling features")
+            processed_df = processed_df.scale_numerical_features(scaling_method="standard")
+            
+            print("   Step 5/5: Creating feature vector...")
+            add_processing_log("Step 5/5: Creating feature vector")
+            processed_df = processed_df.create_feature_vector()
+            
+            processed_df = processed_df.processed_df
+            
+            # Trigger action to execute all transformations (Spark Jobs #5-#10)
+            print("\n⚙️  Executing transformations (Spark Jobs)...")
+            row_count = processed_df.count()
+            print(f"✅ Preprocessing pipeline completed - {row_count:,} rows processed")
             
             logger.info("✅ Complete preprocessing pipeline completed")
             
@@ -692,29 +882,47 @@ def perform_advanced_fraud_detection(df):
         
         # Initialize and train ML models
         try:
+            print("\n🤖 Initializing ML pipeline...")
             logger.info("🤖 Training ML models...")
             ml_pipeline = FraudDetectionMLPipeline(spark)
             
-            # Prepare data for ML (create fraud labels)
+            # Prepare data for ML (create fraud labels) - Spark Job #11
+            print("\n📐 Preparing training and test datasets (Spark Job)...")
+            add_processing_log("📐 Preparing training/test datasets...")
             train_df, test_df = ml_pipeline.prepare_data_for_ml(processed_df, "is_fraud", 0.8)
+            train_count = train_df.count()
+            test_count = test_df.count()
+            print(f"✅ Data split completed - Training: {train_count:,}, Test: {test_count:,}")
+            add_processing_log(f"✅ Split: {train_count:,} train, {test_count:,} test")
             
-            # Train supervised models (simplified for demo)
+            # Train supervised models - Spark Jobs #12-#15 (one per model)
+            print("\n📈 Training supervised ML models (Spark Jobs)...")
+            add_processing_log("🤖 Training ML models (this may take a few minutes)...")
             logger.info("📈 Training supervised models...")
             supervised_models = ml_pipeline.train_supervised_models(train_df, "is_fraud")
+            print(f"✅ Trained {len(supervised_models)} supervised models")
+            add_processing_log(f"✅ Trained {len(supervised_models)} ML models")
             
-            # Train unsupervised models
+            # Train unsupervised models - Spark Jobs #16-#17
+            print("\n🔍 Training unsupervised models (Spark Jobs)...")
             logger.info("🔍 Training unsupervised models...")
             unsupervised_models = ml_pipeline.train_unsupervised_models(processed_df)
+            print(f"✅ Trained {len(unsupervised_models)} unsupervised models")
             
-            # Evaluate models
+            # Evaluate models - Spark Jobs #18-#21
+            print("\n📊 Evaluating model performance (Spark Jobs)...")
             logger.info("📊 Evaluating models...")
             performance = ml_pipeline.evaluate_models(test_df, "is_fraud")
+            print(f"✅ Evaluation completed for {len(performance)} models")
             
-            # Make predictions on full dataset
+            # Make predictions on full dataset - Spark Job #22
+            print("\n🔮 Making predictions on full dataset (Spark Job)...")
             predictions_df = ml_pipeline.predict_fraud(processed_df)
             
-            # Convert to pandas for further processing
+            # Convert to pandas - Spark Job #23
+            print("📦 Converting results to pandas (Spark Job)...")
             processed_pandas_df = predictions_df.select("*").toPandas()
+            print(f"✅ Conversion completed")
             
             logger.info("🎯 ML pipeline completed successfully")
             
@@ -772,6 +980,9 @@ def perform_advanced_fraud_detection(df):
             os.remove(temp_csv_path)
         
         logger.info("✅ Complete ML fraud detection completed successfully")
+        
+        # Print comprehensive analysis report to terminal
+        print_analysis_report(stats, data_profile, anomalies, performance if 'performance' in locals() else None, results_filename, spark_ui_url)
         
         return {
             'stats': stats,
@@ -1023,6 +1234,9 @@ def perform_basic_fraud_detection(df, user_config=None):
         results_filename = f"basic_fraud_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         results_path = os.path.join(app.config['RESULTS_FOLDER'], results_filename)
         processed_df.to_csv(results_path, index=False)
+        
+        # Print analysis report to terminal
+        print_analysis_report(stats, None, None, None, results_filename)
         
         return {
             'stats': stats,
@@ -1598,12 +1812,18 @@ def download_results():
                 if download_format == 'pdf':
                     response = Response(file_data, mimetype='application/pdf')
                     response.headers['Content-Disposition'] = f'attachment; filename=fraudshield_report_{progress_info["timestamp"]}.pdf'
+                    response.headers['Content-Type'] = 'application/pdf'
+                    response.headers['Cache-Control'] = 'no-cache'
                 elif download_format == 'excel':
                     response = Response(file_data, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                     response.headers['Content-Disposition'] = f'attachment; filename=fraudshield_report_{progress_info["timestamp"]}.xlsx'
+                    response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    response.headers['Cache-Control'] = 'no-cache'
                 else:  # csv
                     response = Response(file_data, mimetype='text/csv')
                     response.headers['Content-Disposition'] = f'attachment; filename=fraudshield_report_{progress_info["timestamp"]}.csv'
+                    response.headers['Content-Type'] = 'text/csv'
+                    response.headers['Cache-Control'] = 'no-cache'
                 
                 response.headers['Content-Length'] = len(file_data)
                 return response
@@ -2167,65 +2387,26 @@ def start_download():
                 logger.info(f"📁 Generating {format_type} file data...")
                 
                 if format_type == 'pdf':
-                    # Generate PDF and get raw data
-                    temp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
-                    temp_pdf.close()
+                    # Generate PDF using the existing function
+                    logger.info("📋 Calling generate_branded_pdf function...")
                     
-                    # Create the PDF document
-                    doc = SimpleDocTemplate(temp_pdf.name, pagesize=letter)
-                    story = []
-                    styles = getSampleStyleSheet()
+                    # Find the most recent results file again for PDF generation
+                    latest_file = max(results_files, key=lambda x: os.path.getctime(os.path.join(app.config['RESULTS_FOLDER'], x)))
+                    file_path = os.path.join(app.config['RESULTS_FOLDER'], latest_file)
+                    df_for_pdf = pd.read_csv(file_path)
                     
-                    # Add content to PDF (simplified for background generation)
-                    title_style = ParagraphStyle(
-                        'CustomTitle',
-                        parent=styles['Heading1'],
-                        fontSize=24,
-                        spaceAfter=30,
-                        alignment=TA_CENTER,
-                        textColor=colors.HexColor('#4f46e5')
-                    )
+                    # Generate PDF using the existing comprehensive function
+                    temp_response = generate_branded_pdf(df_for_pdf, timestamp)
                     
-                    story.append(Paragraph("🛡️ FRAUDSHIELD ANALYSIS REPORT", title_style))
-                    story.append(Spacer(1, 20))
+                    # Extract the PDF data from the response
+                    if hasattr(temp_response, 'data'):
+                        file_data = temp_response.data
+                    else:
+                        # If it's a file response, read the data
+                        temp_response.direct_passthrough = False
+                        file_data = temp_response.get_data()
                     
-                    # Summary section
-                    total_transactions = len(df)
-                    fraud_count = len(df[df['prediction'] == 1]) if 'prediction' in df.columns else 0
-                    fraud_rate = (fraud_count / total_transactions * 100) if total_transactions > 0 else 0
-                    
-                    summary_data = [
-                        ['Metric', 'Value'],
-                        ['Total Transactions', f"{total_transactions:,}"],
-                        ['Fraudulent Transactions', f"{fraud_count:,}"],
-                        ['Fraud Rate', f"{fraud_rate:.2f}%"],
-                        ['Analysis Date', datetime.now().strftime('%Y-%m-%d %H:%M:%S')]
-                    ]
-                    
-                    summary_table = Table(summary_data, colWidths=[2.5*inch, 2.5*inch])
-                    summary_table.setStyle(TableStyle([
-                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4f46e5')),
-                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                        ('FONTSIZE', (0, 0), (-1, 0), 12),
-                        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                        ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
-                        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                    ]))
-                    
-                    story.append(summary_table)
-                    story.append(Spacer(1, 20))
-                    
-                    # Build PDF
-                    doc.build(story)
-                    
-                    # Read the PDF data
-                    with open(temp_pdf.name, 'rb') as pdf_file:
-                        file_data = pdf_file.read()
-                    
-                    # Clean up
-                    os.unlink(temp_pdf.name)
+                    logger.info(f"✅ PDF generated successfully ({len(file_data)} bytes)")
                     
                 elif format_type == 'excel':
                     # Generate Excel data
@@ -2307,11 +2488,57 @@ def start_download():
 @app.route('/health')
 def health_check():
     """Health check endpoint"""
+    spark_status = 'unavailable'
+    spark_ui_url = None
+    
+    if ADVANCED_PROCESSING:
+        try:
+            from src.data_ingestion import DataIngestionEngine
+            engine = DataIngestionEngine()
+            spark = engine.initialize_spark()
+            if spark:
+                spark_status = 'running'
+                spark_ui_url = spark.sparkContext.uiWebUrl or 'http://localhost:4040'
+        except Exception as e:
+            spark_status = f'error: {str(e)}'
+    
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
-        'version': '1.0.0'
+        'version': '1.0.0',
+        'spark_status': spark_status,
+        'spark_ui_url': spark_ui_url,
+        'advanced_processing': ADVANCED_PROCESSING
     })
+
+@app.route('/spark/init')
+def init_spark():
+    """Initialize Spark session and start Web UI"""
+    if not ADVANCED_PROCESSING:
+        return jsonify({
+            'error': 'PySpark not available',
+            'message': 'Install PySpark: pip install pyspark'
+        }), 503
+    
+    try:
+        from src.data_ingestion import DataIngestionEngine
+        engine = DataIngestionEngine()
+        spark = engine.initialize_spark()
+        
+        spark_ui_url = spark.sparkContext.uiWebUrl or 'http://localhost:4040'
+        return jsonify({
+            'status': 'success',
+            'message': 'Spark initialized successfully',
+            'spark_version': spark.version,
+            'app_id': spark.sparkContext.applicationId,
+            'spark_ui_url': spark_ui_url,
+            'master': spark.sparkContext.master
+        })
+    except Exception as e:
+        return jsonify({
+            'error': 'Failed to initialize Spark',
+            'details': str(e)
+        }), 500
 
 @app.errorhandler(413)
 def file_too_large(e):
@@ -2326,13 +2553,40 @@ def internal_error(e):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    print("🚀 Starting FraudShield Application...")
-    print("📊 Access the web interface at: http://localhost:5000")
-    print("🔍 Upload CSV files to detect fraudulent transactions")
+    import sys
+    import os
+    
+    # Only print banner once (not on reloader restart)
+    if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
+        print("\n" + "=" * 80)
+        print("🚀 FRAUDSHIELD v3.0 - Fraud Detection System")
+        print("=" * 80)
+        print("\n📊 Application URLs:")
+        print("   ├─ Web Interface:  http://localhost:5000")
+        print("   └─ Spark Web UI:   http://localhost:4040")
+        print("\n🔍 Ready to detect fraudulent transactions!")
+        print("=" * 80 + "\n")
+        
+        # Initialize Spark immediately so Web UI is available
+        if ADVANCED_PROCESSING:
+            try:
+                print("🔄 Initializing Spark session...")
+                from src.data_ingestion import DataIngestionEngine
+                engine = DataIngestionEngine()
+                spark = engine.initialize_spark()
+                print(f"✅ Spark Web UI is now available at http://localhost:4040")
+                print(f"   Spark Version: {spark.version}")
+                print(f"   Application ID: {spark.sparkContext.applicationId}")
+                print("=" * 80 + "\n")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not initialize Spark: {str(e)}")
+                print("   Spark Web UI will be available after first file upload")
+                print("=" * 80 + "\n")
     
     app.run(
         debug=True,
         host='0.0.0.0',
         port=5000,
-        threaded=True
+        threaded=True,
+        use_reloader=True
     )
