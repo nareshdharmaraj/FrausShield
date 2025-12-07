@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudShield Test</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="logo-text">FraudShield</span>
+                </div>
+                <span class="tagline">Enterprise Security Platform</span>
+            </div>
+            
+            <nav class="main-navigation">
+                <a href="#" class="nav-item" data-section="home">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="upload">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analysis</span>
+                </a>
+                <a href="#" class="nav-item" data-section="results">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Results</span>
+                </a>
+                <a href="#" class="nav-item" data-section="about">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Platform</span>
+                </a>
+            </nav>
+            
+            <div class="header-actions">
+                <button class="action-btn">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="content-left">
+                    <div class="hero-badge">
+                        <span class="badge-icon">🛡️</span>
+                        <span class="badge-text">Enterprise Grade Security</span>
+                    </div>
+                    
+                    <h1 class="hero-title">
+                        Advanced Fraud Detection
+                        <span class="title-highlight">Platform</span>
+                    </h1>
+                    
+                    <p class="hero-description">
+                        Powered by Apache Spark and Machine Learning algorithms, our enterprise platform 
+                        delivers real-time fraud detection with unmatched accuracy and scalability.
+                    </p>
+                    
+                    <div class="hero-features">
+                        <div class="feature-item">
+                            <i class="fas fa-lightning-bolt"></i>
+                            <span>Real-time Processing</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-brain"></i>
+                            <span>ML Algorithms</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-shield-check"></i>
+                            <span>99.7% Accuracy</span>
+                        </div>
+                    </div>
+                    
+                    <button class="cta-button" onclick="showSection('upload')">
+                        <span class="btn-text">Start Analysis Now</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                
+                <div class="content-right">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">2M+</div>
+                            <div class="stat-label">Platform Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">99.7%</div>
+                            <div class="stat-label">Accuracy Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Monitoring</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">5ms</div>
+                            <div class="stat-label">Response Time</div>
+                        </div>
+                    </div>
+                    
+                    <div class="key-features">
+                        <h3 class="features-title">Key Features</h3>
+                        <div class="feature-list">
+                            <div class="feature-point">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Advanced ML Models</span>
+                            </div>
+                            <div class="feature-point">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Real-time Analytics</span>
+                            </div>
+                            <div class="feature-point">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Scalable Architecture</span>
+                            </div>
+                            <div class="feature-point">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Enterprise Security</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Other sections (hidden by default) -->
+    <section id="upload" class="upload-section" style="display: none;">
+        <h2>Analysis Section</h2>
+        <p>This is the analysis section content.</p>
+    </section>
+
+    <section id="results" class="results-section" style="display: none;">
+        <h2>Results Section</h2>
+        <p>This is the results section content.</p>
+    </section>
+
+    <section id="about" class="about-section" style="display: none;">
+        <h2>Platform Section</h2>
+        <p>This is the platform section content.</p>
+    </section>
+
+    <script src="static/js/app.js"></script>
+</body>
+</html>

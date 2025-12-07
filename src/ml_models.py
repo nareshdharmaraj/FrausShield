@@ -550,6 +550,11 @@ class FraudDetectionMLPipeline:
             # Make predictions
             predictions = model.transform(df)
             
+            # Debug: Check prediction distribution
+            fraud_count = predictions.filter(col("prediction") == 1).count()
+            total_count = predictions.count()
+            print(f"   📊 Prediction Summary: {fraud_count} frauds out of {total_count} transactions ({fraud_count/total_count*100:.2f}%)")
+            
             # Add fraud probability (for models that support it)
             if hasattr(model, 'probability'):
                 # Extract probability of fraud (class 1)

@@ -425,15 +425,46 @@ def process_file():
             if not isinstance(results, dict) or 'stats' not in results:
                 raise ValueError("Invalid results format from fraud detection")
             
+            # Generate predictions data for frontend table
+            predictions_data = []
+            if 'processed_data' in results:
+                df = results['processed_data']
+                # Get fraud transactions first, then normal transactions, limited to 100 total for display
+                fraud_transactions = df[df['prediction'] == 1].head(50)  # Max 50 fraud
+                normal_transactions = df[df['prediction'] == 0].head(50)  # Max 50 normal
+                sample_df = pd.concat([fraud_transactions, normal_transactions]).head(100)
+                
+                for _, row in sample_df.iterrows():
+                    # Use the actual transaction_id from dataset, with fallback
+                    txn_id = row.get('transaction_id', f'TXN_{row.name + 1:06d}')
+                    
+                    predictions_data.append({
+                        'id': txn_id,
+                        'transaction_id': txn_id,
+                        'amount': float(row.get('amount', 0)),
+                        'merchant': str(row.get('merchant_name', row.get('merchant', 'Unknown'))),
+                        'prediction': int(row.get('prediction', 0)),
+                        'confidence': float(row.get('confidence', 0.5)),
+                        'risk_score': float(row.get('risk_score', 0)),
+                        'location': str(row.get('location', 'Unknown')),
+                        'timestamp': str(row.get('timestamp', ''))
+                    })
+                
+                logger.info(f"📋 Generated {len(predictions_data)} prediction records for frontend display")
+
             # Generate response with statistics and chart data
             response = {
                 'status': 'success',
                 'message': 'File processed successfully',
                 'stats': results.get('stats', {}),
-                'charts': results.get('charts', {})
+                'charts': results.get('charts', {}),
+                'data_quality': results.get('data_quality', {}),
+                'model_performance': results.get('model_performance', {}),
+                'predictions': predictions_data
             }
             
             logger.info(f"✅ Processing completed. Found {results['stats'].get('fraud', 0)} fraudulent transactions")
+            print(f"\n📤 Response sent: Total={response['stats'].get('total')}, Fraud={response['stats'].get('fraud')}, Accuracy={response['stats'].get('model_accuracy')}%")
             return jsonify(response)
             
         except Exception as fraud_error:
@@ -610,10 +641,13 @@ def flexible_data_validation(df):
                 'status': 'success',
                 'message': 'File processed successfully',
                 'stats': results.get('stats', {}),
-                'charts': results.get('charts', {})
+                'charts': results.get('charts', {}),
+                'data_quality': results.get('data_quality', {}),
+                'model_performance': results.get('model_performance', {})
             }
             
             logger.info(f"✅ Processing completed. Found {results['stats'].get('fraud', 0)} fraudulent transactions")
+            print(f"\n📤 Response sent: Total={response['stats'].get('total')}, Fraud={response['stats'].get('fraud')}, Accuracy={response['stats'].get('model_accuracy')}%")
             return jsonify(response)
             
         except Exception as fraud_error:
@@ -672,6 +706,10 @@ def print_analysis_report(stats, data_profile=None, anomalies=None, performance=
     print(f"│  Total Transactions:     {stats['total']:,}")
     print(f"│  Fraudulent:             {stats['fraud']:,} ({stats['fraud_rate']:.2f}%)")
     print(f"│  Normal:                 {stats['normal']:,} ({100-stats['fraud_rate']:.2f}%)")
+    if 'unique_merchants' in stats:
+        print(f"│  Unique Merchants:       {stats['unique_merchants']:,}")
+    if 'model_accuracy' in stats:
+        print(f"│  ML Model Accuracy:      {stats['model_accuracy']:.2f}%")
     print("└" + "─" * 79)
     
     # Data Quality (if available)
@@ -700,7 +738,8 @@ def print_analysis_report(stats, data_profile=None, anomalies=None, performance=
             if isinstance(metrics, dict):
                 for metric, value in metrics.items():
                     if isinstance(value, (int, float)):
-                        print(f"│    ├─ {metric.upper():20s} {value:.4f}")
+                        percentage = value * 100 if metric in ['accuracy', 'precision', 'recall', 'f1_score'] else value
+                        print(f"│    ├─ {metric.upper():20s} {percentage:.2f}{'%' if metric in ['accuracy', 'precision', 'recall', 'f1_score'] else ''}")
             print("│")
         print("└" + "─" * 79)
     
@@ -938,17 +977,37 @@ def perform_advanced_fraud_detection(df):
         # Generate risk scores
         processed_pandas_df['risk_score'] = generate_risk_scores(processed_pandas_df)
         
-        # Calculate statistics
+        # Calculate statistics with proper data type handling
         total_transactions = len(processed_pandas_df)
+        
+        # Ensure prediction column is numeric and handle any NaN values
+        processed_pandas_df['prediction'] = processed_pandas_df['prediction'].fillna(0).astype(int)
         fraud_transactions = int(processed_pandas_df['prediction'].sum())
         normal_transactions = total_transactions - fraud_transactions
+        
+        # Get best model accuracy
+        model_accuracy = 0.0
+        if 'performance' in locals() and performance:
+            best_model = max(performance.keys(), key=lambda x: performance[x].get('accuracy', 0))
+            model_accuracy = performance[best_model].get('accuracy', 0.0) * 100  # Convert to percentage
         
         stats = {
             'total': total_transactions,
             'fraud': fraud_transactions,
             'normal': normal_transactions,
-            'fraud_rate': (fraud_transactions / total_transactions * 100) if total_transactions > 0 else 0
+            'fraud_rate': (fraud_transactions / total_transactions * 100) if total_transactions > 0 else 0,
+            'model_accuracy': round(model_accuracy, 2),
+            'unique_merchants': int(processed_pandas_df['merchant'].nunique()) if 'merchant' in processed_pandas_df.columns else 0
         }
+        
+        # Debug logging
+        print(f"\n📊 Statistics Summary:")
+        print(f"   Total Transactions: {total_transactions}")
+        print(f"   Fraud Detected: {fraud_transactions}")
+        print(f"   Normal Transactions: {normal_transactions}")
+        print(f"   Fraud Rate: {stats['fraud_rate']:.2f}%")
+        print(f"   Model Accuracy: {stats['model_accuracy']:.2f}%")
+        print(f"   Unique Merchants: {stats['unique_merchants']}")
         
         # Generate enhanced chart data
         charts = generate_advanced_chart_data(processed_pandas_df, data_profile, anomalies)
@@ -1407,8 +1466,10 @@ def generate_chart_data(df):
         # Fraud by Merchant (top 10)
         if 'merchant' in df.columns:
             fraud_merchants = df[df['prediction'] == 1]
+            print(f"🔍 Fraud by Merchant: Found {len(fraud_merchants)} fraudulent transactions")
             if len(fraud_merchants) > 0:
                 merchant_fraud = fraud_merchants['merchant'].value_counts().head(10)
+                print(f"   Top merchants with fraud: {list(merchant_fraud.index[:3])}")
                 charts['fraud_by_merchant'] = {
                     'labels': merchant_fraud.index.tolist(),
                     'values': merchant_fraud.values.tolist()
